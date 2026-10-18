@@ -19,6 +19,7 @@ const PICK_RANK = {
   component: 2,
   column: 2,
   stair: 2,
+  ramp: 2,
   railing: 2,
   detailLine: 2,
   roomSeparator: 2,

@@ -5,6 +5,7 @@ import { writeIFC, stepString, ifcGuid } from '../src/io/ifc.js';
 import { buildGLB } from '../src/io/exporters.js';
 import { PdfPage, buildPdf } from '../src/io/pdf.js';
 import { encodeProject, decodeProject, safeFileName, baseName } from '../src/io/native.js';
+import { printTheme } from '../src/views/snapshot.js';
 
 const sample = () => {
   const doc = createSampleProject();
@@ -54,6 +55,15 @@ describe('glTF', () => {
 });
 
 describe('PDF', () => {
+  it('uses a black-on-white theme for rasterized views', () => {
+    const theme = printTheme({ ink: [1, 1, 1], bg: [0, 0, 0], inkCss: '#fff', bgCss: '#000', font: 'sans-serif' });
+    expect(theme.ink).toEqual([0, 0, 0]);
+    expect(theme.bg).toEqual([1, 1, 1]);
+    expect(theme.inkCss).toBe('#000000');
+    expect(theme.bgCss).toBe('#ffffff');
+    expect(theme.font).toBe('sans-serif');
+  });
+
   it('builds a PDF with pages, text and an xref table', async () => {
     const page = new PdfPage(420, 297);
     page.color([0, 0, 0], true);

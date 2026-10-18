@@ -529,6 +529,7 @@ const KIND_ICON = {
   column: 'column',
   beam: 'beam',
   stair: 'stair',
+  ramp: 'ramp',
   railing: 'railing',
   component: 'component',
   room: 'room',
@@ -773,7 +774,7 @@ const RIBBON = [
           { cmd: 'curtainWall', size: 'lg' },
         ],
       },
-      { title: 'Circulação', items: [{ cmd: 'railing', size: 'lg' }, { cmd: 'stair', size: 'lg' }] },
+      { title: 'Circulação', items: [{ cmd: 'railing', size: 'lg' }, { cmd: 'stair', size: 'lg' }, { cmd: 'ramp', size: 'lg' }] },
       { title: 'Ambiente', items: [{ cmd: 'room', size: 'lg' }, { cmd: 'roomSeparator', size: 'lg' }, { cmd: 'rooms-auto' }, { cmd: 'tag' }, { cmd: 'roomFill' }] },
       { title: 'Abertura', items: [{ cmd: 'opening', size: 'lg' }, { cmd: 'shaft', size: 'lg' }] },
       { title: 'Referência', items: [{ cmd: 'level', size: 'lg' }, { cmd: 'grid', size: 'lg' }] },
@@ -1550,6 +1551,7 @@ __modules["core/catalog.js"] = function(__exports) {
  *   column       { typeId, levelId, at, rotation, baseOffset, topLevelId, topOffset, height }
  *   beam         { typeId, levelId, a, b, offset }
  *   stair        { typeId, levelId, topLevelId, baseOffset, topOffset, a, b, width }
+ *   ramp         { levelId, topLevelId, baseOffset, topOffset, height, a, b, width, thickness }
  *   railing      { typeId, levelId, path, offset }
  *   component    { typeId, levelId, at, rotation, offset }
  *   room         { levelId, at, name, number, upperOffset, tagAt }
@@ -1577,6 +1579,7 @@ const CATEGORIES = [
   { id: 'columns', label: 'Pilares', model: true },
   { id: 'beams', label: 'Estrutura (Vigas)', model: true },
   { id: 'stairs', label: 'Escadas', model: true },
+  { id: 'ramps', label: 'Rampas', model: true },
   { id: 'railings', label: 'Guarda-corpos', model: true },
   { id: 'furniture', label: 'Móveis', model: true },
   { id: 'casework', label: 'Marcenaria', model: true },
@@ -1606,6 +1609,7 @@ const KIND_CATEGORY = {
   column: 'columns',
   beam: 'beams',
   stair: 'stairs',
+  ramp: 'ramps',
   railing: 'railings',
   room: 'rooms',
   roomSeparator: 'roomSeparators',
@@ -1636,6 +1640,7 @@ const KIND_LABEL = {
   column: 'Pilar',
   beam: 'Viga',
   stair: 'Escada',
+  ramp: 'Rampa',
   railing: 'Guarda-corpo',
   component: 'Componente',
   room: 'Ambiente',
@@ -2828,6 +2833,26 @@ function stairLayout(doc, s) {
   return { base, top, rise, risers, riserHeight, tread, runLength: (risers - 1) * tread, width: +(s.width ?? type.width) || 1100 };
 }
 
+/** Resolved elevations and footprint dimensions of a ramp. */
+function rampExtent(doc, r) {
+  const base = levelElevation(doc, r.levelId) + (+r.baseOffset || 0);
+  const height = Number.isFinite(+r.height) ? +r.height : 1000;
+  const top = r.topLevelId && doc.get(r.topLevelId) ? levelElevation(doc, r.topLevelId) + (+r.topOffset || 0) : base + height;
+  const delta = sub(r.b || r.a, r.a);
+  const length = len(delta);
+  const dir = length > 1e-9 ? norm(delta) : [1, 0];
+  return {
+    base,
+    top,
+    rise: top - base,
+    length,
+    dir,
+    side: perp(dir),
+    width: Math.max(1, +r.width || 1200),
+    thickness: Math.max(1, +r.thickness || 150),
+  };
+}
+
 __exports.levelOf = levelOf;
 __exports.levelElevation = levelElevation;
 __exports.verticalExtent = verticalExtent;
@@ -2839,6 +2864,7 @@ __exports.hostedBy = hostedBy;
 __exports.dependentsOf = dependentsOf;
 __exports.stairRise = stairRise;
 __exports.stairLayout = stairLayout;
+__exports.rampExtent = rampExtent;
 };
 
 // --- core/mesh.js ---
@@ -4030,7 +4056,7 @@ __modules["core/build3d.js"] = function(__exports) {
  */
 const { MeshBuilder, Frame, hexToRgba } = __require("core/mesh.js");
 const { add, scale, sub, dot, norm, perp, len, clipHalfPlane, triangulate } = __require("core/geom.js");
-const { verticalExtent, openingSize, hostedBy, levelElevation, stairLayout, wallAxis } = __require("core/model.js");
+const { verticalExtent, openingSize, hostedBy, levelElevation, stairLayout, rampExtent, wallAxis } = __require("core/model.js");
 const { axisParam, hubsOf } = __require("core/walls.js");
 const { typeThickness } = __require("core/catalog.js");
 const { roofFaces, roofHeightAt, verticalThickness, planeHeight, edgeProfile } = __require("core/roof.js");
@@ -4072,6 +4098,8 @@ function build3D(ctx, el) {
       return buildBeam(ctx, el);
     case 'stair':
       return buildStair(ctx, el);
+    case 'ramp':
+      return buildRamp(ctx, el);
     case 'railing':
       return buildRailing(ctx, el);
     case 'component':
@@ -4705,6 +4733,21 @@ function buildStair(ctx, el) {
   return b.build();
 }
 
+function buildRamp(ctx, el) {
+  const g = rampExtent(ctx.doc, el);
+  if (g.length < 1) return null;
+  const origin = add(el.a, scale(g.side, -g.width / 2));
+  const profile = [
+    [0, g.base],
+    [g.length, g.top],
+    [g.length, g.top - g.thickness],
+    [0, g.base - g.thickness],
+  ];
+  const b = new MeshBuilder();
+  b.extrudeProfile(profile, origin, g.dir, g.width, materialColor(ctx, el.materialId || 'mat-concrete'));
+  return b.build();
+}
+
 function buildFlight(b, el, type, f, g, th, col, ctx) {
   const { riserHeight: rh, tread: td, width: W } = g;
   const { dir, side } = f;
@@ -4851,7 +4894,7 @@ __modules["core/props.js"] = function(__exports) {
  * Types: length, number, angle, text, textarea, bool, select, level,
  * levelOpt (a level or none), material, readonly, button.
  */
-const { verticalExtent, openingSize, stairLayout } = __require("core/model.js");
+const { verticalExtent, openingSize, stairLayout, rampExtent } = __require("core/model.js");
 const { typeThickness, KIND_LABEL } = __require("core/catalog.js");
 const { roofGeometry } = __require("core/build3d.js");
 const { area: polyArea, perimeter, dist } = __require("core/geom.js");
@@ -4989,6 +5032,28 @@ const INSTANCE = {
     len('tread', 'Profundidade do Piso', 'Cotas', { get: (el, c) => stairLayout(c.doc, el).tread }),
     ro('run', 'Comprimento da Escada', 'Cotas', (el, c) => stairLayout(c.doc, el).runLength),
     P('railings', 'Corrimãos', 'Construção', 'bool'),
+    mark,
+    comments,
+  ],
+  ramp: [
+    P('levelId', 'Pavimento de Partida', 'Restrições', 'level'),
+    len('baseOffset', 'Deslocamento da Base', 'Restrições'),
+    P('topLevelId', 'Pavimento de Chegada', 'Restrições', 'levelOpt', { none: 'Altura Desconectada' }),
+    len('topOffset', 'Deslocamento do Topo', 'Restrições', { ro: (el) => !el.topLevelId }),
+    len('height', 'Altura Desconectada', 'Restrições', { ro: (el) => !!el.topLevelId }),
+    len('width', 'Largura', 'Cotas', { get: (el, c) => rampExtent(c.doc, el).width }),
+    len('thickness', 'Espessura', 'Construção', { get: (el, c) => rampExtent(c.doc, el).thickness }),
+    P('materialId', 'Material', 'Materiais e Acabamentos', 'material'),
+    ro('run', 'Comprimento em Planta', 'Cotas', (el, c) => rampExtent(c.doc, el).length),
+    ro('rise', 'Desnível', 'Cotas', (el, c) => rampExtent(c.doc, el).rise),
+    ro('slope', 'Inclinação (%)', 'Cotas', (el, c) => {
+      const g = rampExtent(c.doc, el);
+      return g.length > 0 ? (100 * g.rise) / g.length : 0;
+    }, 'number'),
+    ro('area', 'Área em Planta', 'Cotas', (el, c) => {
+      const g = rampExtent(c.doc, el);
+      return g.length * g.width;
+    }, 'area'),
     mark,
     comments,
   ],
@@ -5216,7 +5281,6 @@ function describe(doc, el) {
   const base = KIND_LABEL[el.kind] || el.kind;
   return t ? `${base}: ${t.name}` : base;
 }
-
 
 __exports.GROUPS = GROUPS;
 __exports.SHEET_SIZES = SHEET_SIZES;
@@ -6540,7 +6604,7 @@ __modules["core/plan.js"] = function(__exports) {
  * BG is the canvas colour (used to mask what lies underneath).
  */
 const { add, sub, scale, dot, norm, perp, len, dist, lerp, arcPoints, rotate, pointInPolygon, bbox, mid, angleOf } = __require("core/geom.js");
-const { verticalExtent, openingSize, levelElevation, wallAxis } = __require("core/model.js");
+const { verticalExtent, openingSize, levelElevation, rampExtent, wallAxis } = __require("core/model.js");
 const { axisParam, facePoint, hubsOf } = __require("core/walls.js");
 const { wallOpenings, keepIntervals, splitByCuts, roofGeometry, curtainGrid } = __require("core/build3d.js");
 const { stairFlights, flightOutline, flightPoint } = __require("core/stairs.js");
@@ -6692,6 +6756,9 @@ function planGraphics(pc, el) {
       break;
     case 'stair':
       planStair(pc, el, b);
+      break;
+    case 'ramp':
+      planRamp(pc, el, b);
       break;
     case 'railing':
       planRailing(pc, el, b);
@@ -7127,6 +7194,29 @@ function planStair(pc, el, b) {
     const f0 = g.flights[0];
     b.text(add(walk[0], scale(f0.dir, -P(pc, 3))), atBase ? 'UP' : 'DN', { size: P(pc, 2.2), rot: readableAngle(angleOf(f0.dir) - Math.PI / 2) });
   }
+}
+
+function planRamp(pc, el, b) {
+  const atBase = el.levelId === pc.view.levelId;
+  const atTop = el.topLevelId === pc.view.levelId;
+  if ((!atBase && !atTop) || pc.ceiling) return;
+  const g = rampExtent(pc.doc, el);
+  if (g.length < 1) return;
+  const side = scale(g.side, g.width / 2);
+  const outline = [add(el.a, side), add(el.b, side), sub(el.b, side), sub(el.a, side)];
+  const dash = atBase ? 0 : 2;
+  b.poly(outline, true, W.light, dash);
+  b.pick(outline);
+  const forward = atBase ? g.dir : scale(g.dir, -1);
+  const from = atBase ? el.a : el.b;
+  const start = add(from, scale(forward, g.length * 0.18));
+  const end = add(from, scale(forward, g.length * 0.82));
+  const across = scale(g.side, g.width * 0.12);
+  b.line(start, end, W.thin, dash);
+  const head = P(pc, 2.2);
+  b.poly([sub(end, add(scale(forward, head), across)), end, sub(end, sub(scale(forward, head), across))], false, W.thin, dash);
+  const goingUp = (atBase ? g.rise : -g.rise) >= 0;
+  b.text(start, goingUp ? 'UP' : 'DN', { size: P(pc, 2.2), rot: readableAngle(angleOf(forward) - Math.PI / 2) });
 }
 
 function planRailing(pc, el, b) {
@@ -7571,6 +7661,7 @@ function snapFeatures(scene, el) {
       break;
     }
     case 'stair':
+    case 'ramp':
       P(el.a);
       P(el.b);
       break;
@@ -8909,7 +9000,7 @@ __modules["editor/draw.js"] = function(__exports) {
 const { Tool, isNumericStart } = __require("editor/tool.js");
 const { add, sub, scale, dot, norm, perp, dist, len, angleOf, rectPolygon, signedArea, offsetPolygon, mid, rotate, cleanPolygon, closestOnSegment, area: polyArea } = __require("core/geom.js");
 const { typeThickness } = __require("core/catalog.js");
-const { wallAxis, openingSize, hostedBy, stairLayout } = __require("core/model.js");
+const { wallAxis, openingSize, hostedBy, stairLayout, rampExtent } = __require("core/model.js");
 const { planGraphics, planContext, tagAnchor, sectionFrame } = __require("core/plan.js");
 const { nextMark, nextRoomNumber, nextGridName, uniqueName } = __require("core/ops.js");
 const { VIEW_DEFAULTS, planView } = __require("core/template.js");
@@ -9152,6 +9243,12 @@ class WallTool extends Tool {
       this.start = this.o.chain ? p : null;
     }
     this.app.setPrompt(this.prompt);
+  }
+
+  dblclick() {
+    if (this.o.shape !== 'line' || !this.o.chain) return;
+    this.start = null;
+    this.app.cancelTool();
   }
 
   pick(ev) {
@@ -9980,6 +10077,131 @@ class StairTool extends Tool {
   }
 }
 
+class RampTool extends Tool {
+  get placingKind() {
+    return 'ramp';
+  }
+
+  constructor(app, opts) {
+    super(app, opts);
+    this.start = null;
+    this.cursor = null;
+    const levelId = app.activeLevelId();
+    this.o = app.toolOptions('ramp', {
+      width: 1200,
+      thickness: 150,
+      topLevelId: app.doc.levelAbove(levelId)?.id ?? null,
+      height: 1000,
+    });
+  }
+
+  get title() {
+    return 'Criar Rampa';
+  }
+
+  get prompt() {
+    return this.start ? 'Clique para definir o fim da rampa' : 'Clique no início da rampa';
+  }
+
+  options() {
+    const rerender = () => (this.app.renderOptions(), this.app.requestRender());
+    return [
+      lengthField(this, 'Largura', this.o.width, (v) => {
+        this.o.width = Math.max(1, v);
+        rerender();
+      }),
+      lengthField(this, 'Espessura', this.o.thickness, (v) => {
+        this.o.thickness = Math.max(1, v);
+        rerender();
+      }),
+      h(
+        'div.ob-group',
+        h('label', 'Pavimento de chegada'),
+        levelSelect(this.app, this.o.topLevelId || '', (v) => {
+          this.o.topLevelId = v;
+          rerender();
+        }, { none: 'Definir altura' }),
+      ),
+      !this.o.topLevelId ? lengthField(this, 'Altura da rampa', this.o.height, (v) => {
+        this.o.height = v;
+        rerender();
+      }) : null,
+      h('span.ob-sep'),
+      finishCancel(this),
+    ];
+  }
+
+  make(a, b) {
+    const levelId = this.app.activeLevelId();
+    const topLevelId = this.o.topLevelId && this.doc.has(this.o.topLevelId) ? this.o.topLevelId : null;
+    const el = {
+      kind: 'ramp',
+      levelId,
+      topLevelId,
+      baseOffset: 0,
+      topOffset: 0,
+      height: Number.isFinite(+this.o.height) ? +this.o.height : 1000,
+      a,
+      b,
+      width: Math.max(1, +this.o.width || 1200),
+      thickness: Math.max(1, +this.o.thickness || 150),
+      materialId: 'mat-concrete',
+    };
+    return { el, extent: rampExtent(this.doc, el) };
+  }
+
+  down(ev) {
+    const p = this.snap(ev, this.start);
+    if (!p) return;
+    if (!this.start) {
+      this.start = p;
+      this.app.setPrompt(this.prompt);
+      return;
+    }
+    if (dist(p, this.start) < 1) return;
+    const { el } = this.make(this.start, p);
+    this.app.commit('Rampa', () => this.doc.add(el));
+    this.start = null;
+    this.app.setPrompt(this.prompt);
+  }
+
+  finish() {
+    this.start = null;
+    this.app.cancelTool();
+  }
+
+  dblclick() {
+    this.finish();
+  }
+
+  move(ev) {
+    this.cursor = this.snap(ev, this.start);
+    this.app.requestRender();
+  }
+
+  cancel() {
+    if (this.start) {
+      this.start = null;
+      this.app.requestRender();
+      return false;
+    }
+    return true;
+  }
+
+  drawOverlay(ctx, vc, vp) {
+    if (this.start && this.cursor && dist(this.start, this.cursor) > 1) {
+      const { el, extent } = this.make(this.start, this.cursor);
+      previewGraphics(this.app, vc, el, ctx, vp.theme.preview, 0.1);
+      const S = (p) => vc.modelToScreen(p);
+      drawTempDim(ctx, S(this.start), S(this.cursor), this.fmt(extent.length), vp.theme.preview, vp.theme, -20);
+      const at = vc.modelToScreen(mid(this.start, this.cursor));
+      const slope = (100 * Math.abs(extent.rise)) / extent.length;
+      drawTag(ctx, at.x + 18, at.y + 24, `Inclinação ${slope.toFixed(1)}%`, { bg: vp.theme.bgCss, fg: vp.theme.inkCss, border: vp.theme.preview });
+    }
+    this.drawSnap(ctx, vc, vp);
+  }
+}
+
 // Rooms -------------------------------------------------------------------------------------------------
 
 class RoomTool extends Tool {
@@ -10488,7 +10710,6 @@ function createLevel(app, elevation, name) {
   return level;
 }
 
-
 __exports.REGION_PATTERNS = REGION_PATTERNS;
 __exports.previewGraphics = previewGraphics;
 __exports.placeRoomsAutomatically = placeRoomsAutomatically;
@@ -10501,6 +10722,7 @@ __exports.ComponentTool = ComponentTool;
 __exports.LineTool = LineTool;
 __exports.SketchTool = SketchTool;
 __exports.StairTool = StairTool;
+__exports.RampTool = RampTool;
 __exports.RoomTool = RoomTool;
 __exports.DimensionTool = DimensionTool;
 __exports.TextTool = TextTool;
@@ -11316,7 +11538,7 @@ __modules["commands.js"] = function(__exports) {
  *   { label, icon, run(app, args), enabled(app), keys: 'WA' (typed letters),
  *     accel: 'Ctrl+S', desc, search: extra search words }
  */
-const { WallTool, HostedTool, ComponentTool, LineTool, SketchTool, StairTool, RoomTool, DimensionTool, TextTool, TagTool, SectionTool, ElevationTool, LevelTool, placeRoomsAutomatically, tagAll } = __require("editor/draw.js");
+const { WallTool, HostedTool, ComponentTool, LineTool, SketchTool, StairTool, RampTool, RoomTool, DimensionTool, TextTool, TagTool, SectionTool, ElevationTool, LevelTool, placeRoomsAutomatically, tagAll } = __require("editor/draw.js");
 const { MoveTool, RotateTool, MirrorTool, ArrayTool, AlignTool, OffsetTool, TrimTool, SplitTool, MeasureTool, MatchTypeTool, ZoomRegionTool } = __require("editor/modify.js");
 const { deleteElements } = __require("core/ops.js");
 
@@ -11384,6 +11606,7 @@ const COMMANDS = {
   ceiling: { label: 'Forro', icon: 'ceiling', run: tool(SketchTool, { kind: 'ceiling' }) },
   roof: { label: 'Cobertura', icon: 'roof', run: tool(SketchTool, { kind: 'roof' }), desc: 'Cobertura por pegada' },
   stair: { label: 'Escada', icon: 'stair', run: tool(StairTool) },
+  ramp: { label: 'Rampa', icon: 'ramp', keys: 'RA', run: tool(RampTool), desc: 'Desenhar uma rampa entre dois níveis' },
   railing: { label: 'Guarda-corpo', icon: 'railing', run: tool(SketchTool, { kind: 'railing' }) },
   room: { label: 'Ambiente', icon: 'room', keys: 'RM', run: tool(RoomTool) },
   roomSeparator: { label: 'Separador de Ambientes', icon: 'roomSeparator', run: tool(LineTool, { kind: 'roomSeparator' }) },
@@ -11508,10 +11731,10 @@ const { build3D } = __require("core/build3d.js");
 const { planGraphics, planContext, columnOutline, hiddenInView } = __require("core/plan.js");
 const { hostedBy } = __require("core/model.js");
 
-const MODEL_KINDS = ['wall', 'floor', 'ceiling', 'roof', 'door', 'window', 'column', 'beam', 'stair', 'railing', 'component'];
+const MODEL_KINDS = ['wall', 'floor', 'ceiling', 'roof', 'door', 'window', 'column', 'beam', 'stair', 'ramp', 'railing', 'component'];
 const PLAN_KINDS = [...MODEL_KINDS, 'room', 'roomSeparator', 'grid', 'region', 'dimension', 'text', 'tag', 'detailLine', 'section', 'elevation'];
 
-const LEVEL_SCOPED = new Set(['wall', 'roomSeparator', 'column', 'room', 'floor', 'ceiling', 'roof', 'stair', 'railing', 'component', 'beam']);
+const LEVEL_SCOPED = new Set(['wall', 'roomSeparator', 'column', 'room', 'floor', 'ceiling', 'roof', 'stair', 'ramp', 'railing', 'component', 'beam']);
 
 class Scene {
   constructor(doc) {
@@ -12104,6 +12327,7 @@ const KIND_Z = {
   room: 2,
   component: 3,
   stair: 4,
+  ramp: 4,
   railing: 4,
   beam: 5,
   wall: 6,
@@ -13539,6 +13763,7 @@ const PICK_RANK = {
   component: 2,
   column: 2,
   stair: 2,
+  ramp: 2,
   railing: 2,
   detailLine: 2,
   roomSeparator: 2,
@@ -15315,6 +15540,10 @@ const { ModelController } = __require("views/model.js");
 const { PlanController } = __require("views/plan.js");
 const { drawLayerTexts } = __require("views/overlay.js");
 
+function printTheme(theme) {
+  return { ...theme, ink: [0, 0, 0], bg: [1, 1, 1], inkCss: '#000000', bgCss: '#ffffff' };
+}
+
 /**
  * Render a view to a canvas of w x h pixels. fit: zoom to extents first.
  * opts.camera: a camera to use instead (copied).
@@ -15330,7 +15559,7 @@ function renderViewImage(app, view, w, h, { fit = true, camera = null, transpare
     r2: vp.r2,
     r3: vp.r3,
     state: vp.state,
-    theme: vp.theme,
+    theme: printTheme(vp.theme),
     width: w,
     height: h,
     dpr: 1,
@@ -15362,8 +15591,7 @@ function renderViewImage(app, view, w, h, { fit = true, camera = null, transpare
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth);
   gl.viewport(0, 0, w, h);
-  const bg = vp.theme.bg;
-  gl.clearColor(bg[0], bg[1], bg[2], transparent ? 0 : 1);
+  gl.clearColor(1, 1, 1, transparent ? 0 : 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   // Draw without selection highlights.
   const sel = app.selection;
@@ -15401,13 +15629,14 @@ function renderViewImage(app, view, w, h, { fit = true, camera = null, transpare
   ctx.putImageData(img, 0, 0);
   // Text of plan graphics and annotations.
   const layer = isPlan ? c.layer : c.annot;
-  if (layer) drawLayerTexts(ctx, layer, (p) => c.modelToScreen(p), c.cam.zoom, vp.theme, () => 0);
+  if (layer) drawLayerTexts(ctx, layer, (p) => c.modelToScreen(p), c.cam.zoom, fake.theme, () => 0);
   if (isPlan) c.layer.dispose();
   else c.annot?.dispose();
   vp.requestRender();
   return { canvas, controller: c };
 }
 
+__exports.printTheme = printTheme;
 __exports.renderViewImage = renderViewImage;
 };
 
@@ -15646,6 +15875,7 @@ function gripsFor(app, el, vc) {
       case 'roomSeparator':
       case 'beam':
       case 'stair':
+      case 'ramp':
         for (const end of ['a', 'b'])
           out.push({
             at: el[end],
@@ -15752,7 +15982,6 @@ function gripsFor(app, el, vc) {
   }
   return out;
 }
-
 
 __exports.gripsFor = gripsFor;
 };
@@ -16913,6 +17142,7 @@ const ENTITY = {
   column: (g, n, p, r, tag) => `IFCCOLUMN('${g}',$,${n},$,$,${p},${r},${tag},.COLUMN.)`,
   beam: (g, n, p, r, tag) => `IFCBEAM('${g}',$,${n},$,$,${p},${r},${tag},.BEAM.)`,
   stair: (g, n, p, r, tag) => `IFCSTAIR('${g}',$,${n},$,$,${p},${r},${tag},.STRAIGHT_RUN_STAIR.)`,
+  ramp: (g, n, p, r, tag) => `IFCRAMP('${g}',$,${n},$,$,${p},${r},${tag},.STRAIGHT_RUN_RAMP.)`,
   railing: (g, n, p, r, tag) => `IFCRAILING('${g}',$,${n},$,$,${p},${r},${tag},.HANDRAIL.)`,
   furniture: (g, n, p, r, tag) => `IFCFURNITURE('${g}',$,${n},$,$,${p},${r},${tag},.NOTDEFINED.)`,
   plumbing: (g, n, p, r, tag) => `IFCSANITARYTERMINAL('${g}',$,${n},$,$,${p},${r},${tag},.NOTDEFINED.)`,

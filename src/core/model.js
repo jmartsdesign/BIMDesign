@@ -102,3 +102,23 @@ export function stairLayout(doc, s) {
   const tread = +(s.tread ?? type.tread) || 280;
   return { base, top, rise, risers, riserHeight, tread, runLength: (risers - 1) * tread, width: +(s.width ?? type.width) || 1100 };
 }
+
+/** Resolved elevations and footprint dimensions of a ramp. */
+export function rampExtent(doc, r) {
+  const base = levelElevation(doc, r.levelId) + (+r.baseOffset || 0);
+  const height = Number.isFinite(+r.height) ? +r.height : 1000;
+  const top = r.topLevelId && doc.get(r.topLevelId) ? levelElevation(doc, r.topLevelId) + (+r.topOffset || 0) : base + height;
+  const delta = sub(r.b || r.a, r.a);
+  const length = len(delta);
+  const dir = length > 1e-9 ? norm(delta) : [1, 0];
+  return {
+    base,
+    top,
+    rise: top - base,
+    length,
+    dir,
+    side: perp(dir),
+    width: Math.max(1, +r.width || 1200),
+    thickness: Math.max(1, +r.thickness || 150),
+  };
+}

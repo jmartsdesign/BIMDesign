@@ -322,6 +322,7 @@ export const KIND_ICON = {
   column: 'column',
   beam: 'beam',
   stair: 'stair',
+  ramp: 'ramp',
   railing: 'railing',
   component: 'component',
   room: 'room',

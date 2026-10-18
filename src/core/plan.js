@@ -9,7 +9,7 @@
  * BG is the canvas colour (used to mask what lies underneath).
  */
 import { add, sub, scale, dot, norm, perp, len, dist, lerp, arcPoints, rotate, pointInPolygon, bbox, mid, angleOf } from './geom.js';
-import { verticalExtent, openingSize, levelElevation, wallAxis } from './model.js';
+import { verticalExtent, openingSize, levelElevation, rampExtent, wallAxis } from './model.js';
 import { axisParam, facePoint, hubsOf } from './walls.js';
 import { wallOpenings, keepIntervals, splitByCuts, roofGeometry, curtainGrid } from './build3d.js';
 import { stairFlights, flightOutline, flightPoint } from './stairs.js';
@@ -161,6 +161,9 @@ export function planGraphics(pc, el) {
       break;
     case 'stair':
       planStair(pc, el, b);
+      break;
+    case 'ramp':
+      planRamp(pc, el, b);
       break;
     case 'railing':
       planRailing(pc, el, b);
@@ -596,6 +599,29 @@ function planStair(pc, el, b) {
     const f0 = g.flights[0];
     b.text(add(walk[0], scale(f0.dir, -P(pc, 3))), atBase ? 'UP' : 'DN', { size: P(pc, 2.2), rot: readableAngle(angleOf(f0.dir) - Math.PI / 2) });
   }
+}
+
+function planRamp(pc, el, b) {
+  const atBase = el.levelId === pc.view.levelId;
+  const atTop = el.topLevelId === pc.view.levelId;
+  if ((!atBase && !atTop) || pc.ceiling) return;
+  const g = rampExtent(pc.doc, el);
+  if (g.length < 1) return;
+  const side = scale(g.side, g.width / 2);
+  const outline = [add(el.a, side), add(el.b, side), sub(el.b, side), sub(el.a, side)];
+  const dash = atBase ? 0 : 2;
+  b.poly(outline, true, W.light, dash);
+  b.pick(outline);
+  const forward = atBase ? g.dir : scale(g.dir, -1);
+  const from = atBase ? el.a : el.b;
+  const start = add(from, scale(forward, g.length * 0.18));
+  const end = add(from, scale(forward, g.length * 0.82));
+  const across = scale(g.side, g.width * 0.12);
+  b.line(start, end, W.thin, dash);
+  const head = P(pc, 2.2);
+  b.poly([sub(end, add(scale(forward, head), across)), end, sub(end, sub(scale(forward, head), across))], false, W.thin, dash);
+  const goingUp = (atBase ? g.rise : -g.rise) >= 0;
+  b.text(start, goingUp ? 'UP' : 'DN', { size: P(pc, 2.2), rot: readableAngle(angleOf(forward) - Math.PI / 2) });
 }
 
 function planRailing(pc, el, b) {

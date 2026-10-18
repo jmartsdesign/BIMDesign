@@ -6,7 +6,7 @@
  * Types: length, number, angle, text, textarea, bool, select, level,
  * levelOpt (a level or none), material, readonly, button.
  */
-import { verticalExtent, openingSize, stairLayout } from './model.js';
+import { verticalExtent, openingSize, stairLayout, rampExtent } from './model.js';
 import { typeThickness, KIND_LABEL } from './catalog.js';
 import { roofGeometry } from './build3d.js';
 import { area as polyArea, perimeter, dist } from './geom.js';
@@ -144,6 +144,28 @@ const INSTANCE = {
     len('tread', 'Profundidade do Piso', 'Cotas', { get: (el, c) => stairLayout(c.doc, el).tread }),
     ro('run', 'Comprimento da Escada', 'Cotas', (el, c) => stairLayout(c.doc, el).runLength),
     P('railings', 'Corrimãos', 'Construção', 'bool'),
+    mark,
+    comments,
+  ],
+  ramp: [
+    P('levelId', 'Pavimento de Partida', 'Restrições', 'level'),
+    len('baseOffset', 'Deslocamento da Base', 'Restrições'),
+    P('topLevelId', 'Pavimento de Chegada', 'Restrições', 'levelOpt', { none: 'Altura Desconectada' }),
+    len('topOffset', 'Deslocamento do Topo', 'Restrições', { ro: (el) => !el.topLevelId }),
+    len('height', 'Altura Desconectada', 'Restrições', { ro: (el) => !!el.topLevelId }),
+    len('width', 'Largura', 'Cotas', { get: (el, c) => rampExtent(c.doc, el).width }),
+    len('thickness', 'Espessura', 'Construção', { get: (el, c) => rampExtent(c.doc, el).thickness }),
+    P('materialId', 'Material', 'Materiais e Acabamentos', 'material'),
+    ro('run', 'Comprimento em Planta', 'Cotas', (el, c) => rampExtent(c.doc, el).length),
+    ro('rise', 'Desnível', 'Cotas', (el, c) => rampExtent(c.doc, el).rise),
+    ro('slope', 'Inclinação (%)', 'Cotas', (el, c) => {
+      const g = rampExtent(c.doc, el);
+      return g.length > 0 ? (100 * g.rise) / g.length : 0;
+    }, 'number'),
+    ro('area', 'Área em Planta', 'Cotas', (el, c) => {
+      const g = rampExtent(c.doc, el);
+      return g.length * g.width;
+    }, 'area'),
     mark,
     comments,
   ],
@@ -371,4 +393,3 @@ export function describe(doc, el) {
   const base = KIND_LABEL[el.kind] || el.kind;
   return t ? `${base}: ${t.name}` : base;
 }
-
