@@ -2,71 +2,71 @@
 
 <h1 align="center">BIMDesign</h1>
 
-<p align="center">Building information modeling in the browser. An open-source alternative to Autodesk Revit, ArchiCAD and Vectorworks.</p>
+<p align="center">Modelagem da informação da construção no navegador. Uma alternativa de código aberto ao Autodesk Revit, ArchiCAD e Vectorworks.</p>
 
-> **Early alpha.** Features may change and project data could be lost. Please do not rely on BIMDesign for real projects yet, and keep copies of important work.
+> **Versão alfa inicial.** Os recursos podem mudar e os dados do projeto podem ser perdidos. Ainda não confie ao BIMDesign projetos reais e mantenha cópias dos trabalhos importantes.
 
-BIMDesign models a building as real elements on levels: walls with layered constructions, doors and windows that cut their own openings, floors, ceilings, roofs, columns, beams, stairs, railings, furniture and fixtures, and rooms that measure themselves. Every view is generated from the one model, so a change in a plan shows up in sections, elevations, 3D, schedules and sheets at once.
+BIMDesign representa edifícios com elementos reais organizados por pavimentos: paredes com várias camadas, portas e janelas que abrem os respetivos vãos, pisos, forros, coberturas, pilares, vigas, escadas, guarda-corpos, mobiliário e equipamentos, além de ambientes com medições automáticas. Todas as vistas são geradas a partir do mesmo modelo, pelo que uma alteração numa planta também se reflete nos cortes, nas elevações, na vista 3D, nas tabelas e nas pranchas.
 
-It runs entirely in the browser and does not require an account or an internet connection. Project files are opened and saved on this device.
+O programa funciona inteiramente no navegador e não precisa de conta nem de ligação à Internet. Os ficheiros de projeto são abertos e guardados neste dispositivo.
 
-### Offline use
+### Utilização offline
 
-Open `index.html` directly (`file://`) or run it from a local server; BIMDesign does not contact external services. Projects are saved as `.bdp` files using the device's file picker, or downloaded if the browser does not support direct file saving. A local browser recovery copy helps restore work after a reload; it is not a substitute for saving a project file. Keep copies of important projects.
+Abra diretamente o ficheiro `index.html` (`file://`) ou execute o programa num servidor local; o BIMDesign não contacta serviços externos. Os projetos são guardados como ficheiros `.bdp` através do seletor de ficheiros do dispositivo ou descarregados, caso o navegador não permita a gravação direta. Uma cópia de recuperação local no navegador ajuda a restaurar o trabalho após recarregar a página, mas não substitui a gravação do ficheiro do projeto. Mantenha cópias dos projetos importantes.
 
-Keep the files in the downloaded folder together, including `bundle.js`. That classic-script bundle is what lets the app run from `file://` without browser ES-module restrictions. When changing source files, regenerate it with `node build-bundle.cjs`.
+Mantenha juntos os ficheiros da pasta transferida, incluindo `bundle.js`. Este ficheiro JavaScript clássico permite executar a aplicação com `file://`, sem as restrições do navegador aos módulos ES. Sempre que alterar os ficheiros de origem, volte a gerar o bundle com `node build-bundle.cjs`.
 
-## Features
+## Funcionalidades
 
-**Modeling**
-- Walls drawn as chains, rectangles or along picked lines, with a choice of location line (centerline, exterior or interior face), base and top constraints, and typed lengths. Walls join cleanly at corners, T junctions and multi-wall nodes, and their layers (finish, structure, insulation, air space...) show in plan at fine detail.
-- Curtain walls with a regular grid of mullions and glass panels.
-- Doors (single, double, sliding, pocket, bifold, overhead, cased opening) and windows (fixed, casement, double hung, sliding, awning, picture) hosted in walls, with swing and facing controls. Rectangular wall openings.
-- Floors and ceilings from a picked room or building outline, a rectangle, or a sketched boundary. Footprint roofs with a slope per edge: hips, gables and shed roofs come out of the same model.
-- Walls can attach their tops to a roof and follow it when the roof changes.
-- Shaft openings that cut floors, ceilings and roofs through a range of levels.
-- Columns, beams, straight, L-shaped and U-shaped stairs with automatic riser counts, landings and handrails, and railings.
-- A library of furniture, casework, plumbing fixtures, appliances, planting and lighting. Furniture placed near a wall turns its back to it.
-- Rooms placed by clicking or automatically, bounded by walls, columns and room separation lines, with live area, perimeter and volume.
-- Levels and grids.
+**Modelação**
+- Paredes desenhadas em sequência, em retângulos ou ao longo de linhas selecionadas, com escolha da linha de referência (eixo, face exterior ou interior), restrições de base e topo e introdução de comprimentos. As paredes ligam-se corretamente em cantos, junções em T e nós com várias paredes; as camadas (acabamento, estrutura, isolamento, caixa de ar, entre outras) são apresentadas em detalhe na planta.
+- Paredes cortina com grelha regular de montantes e painéis de vidro.
+- Portas (simples, duplas, de correr, de correr embutidas, bifold, de garagem e vãos sem porta) e janelas (fixas, de batente, de guilhotina, de correr, projetantes e panorâmicas) inseridas em paredes, com controlos de abertura e orientação. Vãos retangulares em paredes.
+- Pisos e forros criados a partir de um ambiente ou do contorno do edifício selecionado, de um retângulo ou de um contorno desenhado. Coberturas definidas por pendentes em cada aresta: de quatro águas, de duas águas ou de uma água, geradas a partir do mesmo modelo.
+- As paredes podem ficar ligadas a uma cobertura e acompanhar as alterações à sua forma.
+- Aberturas de caixa que atravessam pisos, forros e coberturas ao longo de vários pavimentos.
+- Pilares, vigas, escadas retas, em L e em U com número automático de espelhos, patamares e corrimãos, e guarda-corpos.
+- Biblioteca de mobiliário, armários, louças sanitárias, eletrodomésticos, plantas e iluminação. O mobiliário colocado junto a uma parede fica orientado com a parte posterior virada para ela.
+- Ambientes colocados manual ou automaticamente, delimitados por paredes, pilares e linhas separadoras, com cálculo em tempo real de área, perímetro e volume.
+- Pavimentos e grelhas de eixos.
 
-**Editing**
-- Selection by click, window (left to right) and crossing (right to left), Tab to cycle overlapping elements, select all instances.
-- Drag to move (joined walls stay joined; doors slide along their wall or move to another wall), grips on wall ends, slab corners and section lines, flip controls, and editable temporary dimensions.
-- Move, copy, rotate, mirror (pick or draw an axis), array, align, offset, trim/extend to corner or to a reference, split, pin, match type, copy and paste.
-- Object snaps (endpoints, midpoints, intersections, perpendicular, nearest), angle and length increments, and alignment with nearby points.
-- Undo and redo for everything.
+**Edição**
+- Seleção por clique, janela (da esquerda para a direita) ou cruzamento (da direita para a esquerda); use Tab para percorrer elementos sobrepostos e selecione todas as instâncias.
+- Arraste para mover (as paredes ligadas mantêm as ligações; as portas deslizam ao longo da parede ou podem ser movidas para outra), utilize os pontos de controlo nas extremidades das paredes, nos cantos das lajes e nas linhas de corte, inverta a orientação e edite cotas temporárias.
+- Mover, copiar, rodar, espelhar (por seleção ou desenho de um eixo), criar matrizes, alinhar, deslocar, aparar/estender até um canto ou referência, dividir, fixar, igualar tipo, copiar e colar.
+- Ajustes a objetos (extremidades, pontos médios, interseções, perpendicularidade e ponto mais próximo), incrementos de ângulo e comprimento e alinhamento com pontos próximos.
+- Anular e refazer todas as operações.
 
-**Views and documentation**
-- Floor and ceiling plans with cut plane, detail level, underlay of the level below, room color fill and per-view visibility of categories and elements.
-- 3D views with an orientation cube, orbit, perspective or orthographic projection, section box and five visual styles.
-- Elevations and sections drawn from the model with cut elements filled, levels and grids annotated.
-- Aligned dimensions that follow the walls they measure, text, tags, detail lines and filled regions.
-- Schedules of doors, windows, rooms, walls, floors, furniture, columns and stairs, with field selection, sorting, grouping, totals, in-place editing and CSV export.
-- Sheets with a title block and placed views.
-- Temporary hide and isolate, reveal hidden elements, thin lines.
+**Vistas e documentação**
+- Plantas de pavimento e de forro com plano de corte, nível de detalhe, sobreposição do pavimento inferior, preenchimento colorido dos ambientes e controlo da visibilidade de categorias e elementos em cada vista.
+- Vistas 3D com cubo de orientação, órbita, projeção em perspetiva ou ortográfica, caixa de corte e cinco estilos visuais.
+- Elevações e cortes gerados a partir do modelo, com preenchimento dos elementos cortados e anotação de pavimentos e grelhas.
+- Cotas alinhadas que acompanham as paredes medidas, texto, etiquetas, linhas de detalhe e regiões preenchidas.
+- Tabelas de portas, janelas, ambientes, paredes, pisos, mobiliário, pilares e escadas, com seleção de campos, ordenação, agrupamento, totais, edição direta e exportação CSV.
+- Pranchas com legenda e vistas colocadas.
+- Ocultar e isolar temporariamente, revelar elementos ocultos e apresentar linhas finas.
 
-**Files**
-- Projects (.bdp) opened and saved on this device; local recovery copies help work survive a reload.
-- Import DXF drawings into a plan, section or sheet as detail lines and text, to trace over or annotate.
-- Export to IFC (IFC4, for other BIM software), glTF and OBJ (3D), DXF (plans), PDF, SVG and PNG (drawings and sheets), and CSV (schedules).
+**Ficheiros**
+- Projetos (`.bdp`) abertos e guardados neste dispositivo; cópias locais de recuperação ajudam a preservar o trabalho após recarregar a página.
+- Importe desenhos DXF para uma planta, corte ou prancha como linhas de detalhe e texto, para os decalcar ou anotar.
+- Exporte para IFC (IFC4, compatível com outros programas BIM), glTF e OBJ (3D), DXF (plantas), PDF, SVG e PNG (desenhos e pranchas) e CSV (tabelas).
 
 **Interface**
-- Ribbon with contextual tabs, options bar, Properties palette with type selector and type editor (including wall, floor, roof and ceiling layer structures), Project Browser, view tabs, view control bar and status bar.
-- Two-letter keyboard shortcuts (for example WA wall, DR door, WN window, MV move), command search (Ctrl+K), context menus and a full keyboard path through the panels.
-- Light, dark and system themes. Works with mouse, trackpad, touch and keyboard, on desktops, tablets and phones.
+- Faixa de opções com separadores contextuais, barra de opções, painel Propriedades com seletor e editor de tipos (incluindo estruturas de camadas de paredes, pisos, coberturas e forros), Navegador de Projeto, separadores de vistas, barra de controlo da vista e barra de estado.
+- Atalhos de teclado de duas letras (por exemplo, WA para parede, DR para porta, WN para janela e MV para mover), pesquisa de comandos (Ctrl+K), menus de contexto e navegação completa pelos painéis com o teclado.
+- Temas claro, escuro e do sistema. Compatível com rato, trackpad, toque e teclado, em computadores, tablets e telemóveis.
 
-## Getting around
+## Como começar
 
-1. Start a metric or imperial project from the Home screen, or open the sample house.
-2. Draw walls with **Wall** (WA). Click to start, click again to end each segment; type a number to enter a length. Esc ends the chain.
-3. Add doors (DR) and windows (WN) by moving over a wall. Space flips them.
-4. Create a **Floor** or **Roof** by clicking a wall of the building, then **Finish**.
-5. Place rooms (RM), then open the **3D View**, an elevation or a section from the Project Browser.
+1. Crie um projeto métrico ou imperial no ecrã inicial, ou abra a casa de exemplo.
+2. Desenhe paredes com **Parede** (WA). Clique para iniciar e volte a clicar para terminar cada segmento; introduza um número para definir o comprimento. Prima Esc para terminar a sequência.
+3. Adicione portas (DR) e janelas (WN) movendo o cursor sobre uma parede. Prima Espaço para inverter a orientação.
+4. Crie um **Piso** ou uma **Cobertura** clicando numa parede do edifício e, em seguida, em **Concluir**.
+5. Coloque ambientes (RM) e abra uma **Vista 3D**, elevação ou corte no Navegador de Projeto.
 
-Navigation: the wheel zooms at the cursor, the middle button pans. In 3D, drag with the right button (or Shift and the middle button) to orbit. On touch screens, pinch to zoom, drag with two fingers to pan and with one finger to orbit in 3D. Press F1 for help and shortcuts.
+Navegação: a roda do rato amplia ou reduz em torno do cursor; o botão do meio desloca a vista. Em 3D, arraste com o botão direito (ou com Shift e o botão do meio) para orbitar. Em ecrãs táteis, use o gesto de pinça para ampliar ou reduzir, arraste com dois dedos para deslocar e com um dedo para orbitar em 3D. Prima F1 para consultar a ajuda e os atalhos.
 
-## Development
+## Desenvolvimento
 
 ```sh
 npm install
@@ -75,26 +75,26 @@ npm test           # unit tests (Vitest)
 npm run build      # production build in dist/
 ```
 
-Open `/?sample` to start with the sample house.
+Abra `/?sample` para iniciar com a casa de exemplo.
 
-### Architecture
+### Arquitetura
 
-| Area | Where | Notes |
+| Área | Localização | Descrição |
 |---|---|---|
-| Document | `src/core/doc.js` | One store of immutable items (elements, types, views, materials) with transactions, previews, undo and redo. |
-| Model logic | `src/core` | Wall joins (`walls.js`), room boundaries from a planar arrangement (`rooms.js`), footprint roofs as the lower envelope of slope planes (`roof.js`), stairs, procedural families, schedules, sheets. Framework-free and unit tested. |
-| Geometry | `src/core/build3d.js`, `src/core/plan.js` | Each element builds a 3D mesh with feature edges, and plan graphics (cut fills with hatch patterns, line weights, dashes, text) for the view it is drawn in. |
-| Scene | `src/core/scene.js` | Caches meshes and plan graphics per element and rebuilds only what an edit touched, by comparing each result's inputs. |
-| Rendering | `src/render` | WebGL2. Plans: instanced, antialiased lines with weights and dash patterns, hatched fills, drawn in layers from chunked GPU buffers. 3D: chunked meshes, screen-space edges, clip planes, transparency, GPU picking. A per-element state texture handles selection, hover, hiding and halftone without touching geometry. |
-| Views | `src/views` | Plan, 3D/elevation/section, schedule and sheet controllers; one shared WebGL canvas plus a 2D overlay for text and feedback. |
-| Editing | `src/editor` | Tools, snapping, grips, temporary dimensions. |
-| Interface | `src/ui` | No framework: ribbon, panels, dialogs, menus. |
-| Files | `src/io` | Local project files, browser recovery, and the IFC, glTF, OBJ, DXF, PDF and SVG writers. |
+| Documento | `src/core/doc.js` | Armazenamento único de elementos imutáveis (elementos, tipos, vistas e materiais), com transações, pré-visualizações, anulação e repetição. |
+| Lógica do modelo | `src/core` | Ligações entre paredes (`walls.js`), limites dos ambientes calculados a partir de uma estrutura planar (`rooms.js`), coberturas de contorno calculadas como envelope inferior de planos inclinados (`roof.js`), escadas, famílias procedimentais, tabelas e pranchas. Sem dependência de frameworks e com testes unitários. |
+| Geometria | `src/core/build3d.js`, `src/core/plan.js` | Cada elemento gera uma malha 3D com arestas características e gráficos de planta (preenchimentos de corte com padrões de hachura, espessuras de linha, tracejados e texto) para a vista em que é apresentado. |
+| Cena | `src/core/scene.js` | Guarda em cache as malhas e os gráficos de planta de cada elemento e só os reconstrói quando uma edição os afeta, comparando os dados de entrada de cada resultado. |
+| Renderização | `src/render` | WebGL2. Plantas: linhas instanciadas e antisserrilhadas com espessuras e padrões de tracejado, preenchimentos hachurados desenhados em camadas a partir de buffers GPU segmentados. 3D: malhas segmentadas, arestas projetadas no ecrã, planos de corte, transparência e seleção por GPU. Uma textura de estado por elemento gere seleção, passagem do cursor, ocultação e meio-tom sem alterar a geometria. |
+| Vistas | `src/views` | Controladores de plantas, vistas 3D/elevações/cortes, tabelas e pranchas; um canvas WebGL partilhado e uma sobreposição 2D para texto e indicações. |
+| Edição | `src/editor` | Ferramentas, ajustes, pontos de controlo e cotas temporárias. |
+| Interface | `src/ui` | Sem framework: faixa de opções, painéis, diálogos e menus. |
+| Ficheiros | `src/io` | Ficheiros de projeto locais, recuperação no navegador e geração de IFC, glTF, OBJ, DXF, PDF e SVG. |
 
-Lengths are millimetres internally and shown in the project's units. Settings are stored locally in this browser; project files are saved on this device.
+Os comprimentos são guardados internamente em milímetros e apresentados nas unidades do projeto. As definições são guardadas localmente neste navegador; os ficheiros de projeto são guardados neste dispositivo.
 
-## License
+## Licença
 
-This repository, including all its contents, sub-projects, modules, and components, is licensed under [MIT](../../LICENSE) unless explicitly stated otherwise. Third-party libraries included in this repository may be subject to their own licenses.
+Este repositório, incluindo todo o seu conteúdo, subprojetos, módulos e componentes, é distribuído ao abrigo da licença [MIT](../../LICENSE), salvo indicação em contrário. As bibliotecas de terceiros incluídas neste repositório podem estar sujeitas às respetivas licenças.
 
-Third-party libraries: [earcut](https://github.com/mapbox/earcut) (ISC) and [Lucide](https://lucide.dev) icons (ISC).
+Bibliotecas de terceiros: [earcut](https://github.com/mapbox/earcut) (ISC) e ícones [Lucide](https://lucide.dev) (ISC).
