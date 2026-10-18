@@ -1,0 +1,22 @@
+{
+  "name": "BIMDesign",
+  "short_name": "BIMDesign",
+  "description": "Modelagem de informação da construção (BIM) gratuita e de código aberto no navegador.",
+  "id": "bimdesign",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#16191e",
+  "theme_color": "#16191e",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": { "application/octet-stream": [".bdp"] }
+    }
+  ]
+}

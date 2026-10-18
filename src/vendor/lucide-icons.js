@@ -1,0 +1,102 @@
+/**
+ * Lucide icon path data (vendored).
+ * Replaces the `lucide` npm import so the app runs without a bundler.
+ * Each icon is an array of [tag, attributes] tuples for the build() function.
+ * Source: https://github.com/lucide-icons/lucide (ISC license)
+ * All icons are 24x24, stroke-based.
+ */
+
+const P = (d) => ['path', { d }];
+const C = (cx, cy, r) => ['circle', { cx: String(cx), cy: String(cy), r: String(r) }];
+const R = (x, y, w, h, rx) => ['rect', rx ? { x: String(x), y: String(y), width: String(w), height: String(h), rx: String(rx) } : { x: String(x), y: String(y), width: String(w), height: String(h) }];
+const E = (cx, cy, rx, ry) => ['ellipse', { cx: String(cx), cy: String(cy), rx: String(rx), ry: String(ry) }];
+const L = (x1, y1, x2, y2) => ['line', { x1: String(x1), y1: String(y1), x2: String(x2), y2: String(y2) }];
+const POLY = (points) => ['polyline', { points }];
+const POLYG = (points) => ['polygon', { points }];
+
+export const ArrowDownToLine = [P('M12 17V5'), P('m19 12-7 7-7-7'), P('M19 21H5')];
+export const ArrowUpFromLine = [P('m18 9-6-6-6 6'), P('M12 3v14'), P('M5 21h14')];
+export const Armchair = [P('M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3'), P('M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z'), P('M5 18v2'), P('M19 18v2')];
+export const Box = [P('M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z'), P('m3.3 7 8.7 5 8.7-5'), P('M12 22V12')];
+export const Check = [P('M20 6 9 17l-5-5')];
+export const ChevronDown = [P('m6 9 6 6 6-6')];
+export const ChevronLeft = [P('m15 18-6-6 6-6')];
+export const ChevronRight = [P('m9 18 6-6-6-6')];
+export const ChevronUp = [P('m18 15-6-6-6 6')];
+export const CircleHelp = [C(12, 12, 10), P('M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'), P('M12 17h.01')];
+export const Clipboard = [R(8, 2, 8, 4, 1), P('M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2')];
+export const ClipboardPaste = [R(8, 2, 8, 4, 1), P('M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'), P('M9 14h6'), P('m15 10-2 2-2-2'), P('M12 12v6')];
+export const Cloud = [P('M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z')];
+export const Copy = [R(8, 8, 14, 14, 2), P('M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2')];
+export const Download = [P('M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'), POLY('17 8 12 13 7 8'), P('M12 15V3')];
+export const Ellipsis = [C(12, 12, 1), C(19, 12, 1), C(5, 12, 1)];
+export const Eye = [P('M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'), C(12, 12, 3)];
+export const EyeOff = [P('M9.88 9.88a3 3 0 1 0 4.24 4.24'), P('M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24'), L(2, 2, 22, 22)];
+export const File = [P('M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'), P('M14 2v4a2 2 0 0 0 2 2h4')];
+export const FilePlus = [P('M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'), P('M14 2v4a2 2 0 0 0 2 2h4'), P('M12 18v-6'), P('M9 15h6')];
+export const FileText = [P('M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'), P('M14 2v4a2 2 0 0 0 2 2h4'), P('M10 9H8'), P('M16 13H8'), P('M16 17H8')];
+export const Folder = [P('M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z')];
+export const FolderOpen = [P('m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2')];
+export const CodeXml = [P('m18 16 4-4-4-4'), P('m6 8-4 4 4 4'), P('m14.5 4-5 16')];
+export const Hand = [P('M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2'), P('M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2'), P('M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8'), P('M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15')];
+export const HardDrive = [L(6, 4, 6, 20), L(18, 4, 18, 20), P('M2 20h20'), C(18, 18, 1), C(6, 18, 1)];
+export const History = [P('M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'), P('M3 3v5h5'), P('M12 7v5l4 2')];
+export const House = [P('M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8'), P('M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z')];
+export const Image = [R(3, 3, 18, 18, 2), C(9, 9, 2), P('m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21')];
+export const Info = [C(12, 12, 10), P('M12 16v-4'), P('M12 8h.01')];
+export const Keyboard = [R(2, 6, 20, 12, 2), P('M6 10h.01'), P('M10 10h.01'), P('M14 10h.01'), P('M18 10h.01'), P('M7 14h10')];
+export const Layers = [P('M12 2 2 7l10 5 10-5-10-5Z'), P('m2 17 10 5 10-5'), P('m2 12 10 5 10-5')];
+export const LogIn = [P('M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4'), POLY('10 17 15 12 10 7'), P('M15 12H3')];
+export const LogOut = [P('M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'), POLY('16 17 21 12 16 7'), P('M21 12H9')];
+export const Lock = [R(3, 11, 18, 11, 2), P('M7 11V7a5 5 0 0 1 10 0v4')];
+export const LockOpen = [R(3, 11, 18, 11, 2), P('M7 11V7a5 5 0 0 1 9.9-1')];
+export const Maximize = [P('M8 3H5a2 2 0 0 0-2 2v3'), P('M21 8V5a2 2 0 0 0-2-2h-3'), P('M3 16v3a2 2 0 0 0 2 2h3'), P('M16 21h3a2 2 0 0 0 2-2v-3')];
+export const Menu = [L(4, 6, 20, 6), L(4, 12, 20, 12), L(4, 18, 20, 18)];
+export const Minus = [L(5, 12, 19, 12)];
+export const Monitor = [R(2, 3, 20, 14, 2), L(8, 21, 16, 21), L(12, 17, 12, 21)];
+export const Moon = [P('M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z')];
+export const MousePointer2 = [P('m4 4 7.07 17 2.51-7.39L21 11.07z')];
+export const PanelLeft = [R(3, 3, 18, 18, 2), L(9, 3, 9, 21)];
+export const PanelRight = [R(3, 3, 18, 18, 2), L(15, 3, 15, 21)];
+export const Pin = [P('M12 17v5'), P('M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z')];
+export const PinOff = [P('M12 17v5'), P('M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89'), P('M5.42 5.42A2 2 0 0 1 7 5h6a1 1 0 0 1 1 1v2.34'), P('m2 2 20 20'), P('M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16h4')];
+export const Plus = [L(12, 5, 12, 19), L(5, 12, 19, 12)];
+export const Printer = [P('M6 9V3h12v6'), R(6, 14, 12, 8), P('M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2')];
+export const Redo2 = [P('m15 14 5-5-5-5'), P('M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13')];
+export const RefreshCw = [P('M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'), P('M21 3v5h-5'), P('M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'), P('M8 16H3v5')];
+export const RotateCw = [P('M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8'), P('M21 3v5h-5')];
+export const Ruler = [P('M21.3 8.7 15.3 2.7a1 1 0 0 0-1.4 0l-11.2 11.2a1 1 0 0 0 0 1.4l6 6a1 1 0 0 0 1.4 0l11.2-11.2a1 1 0 0 0 0-1.4Z'), P('m7.5 10.5 2 2'), P('m10.5 7.5 2 2'), P('m13.5 4.5 2 2'), P('m4.5 13.5 2 2')];
+export const Save = [P('M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'), P('M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7'), P('M7 3v4a1 1 0 0 0 1 1h7')];
+export const SaveAll = [P('M10 2H5a2 2 0 0 0-2 2v5'), P('M18 6h2a2 2 0 0 1 2 2v3'), P('M21 6v5a2 2 0 0 1-.6 1.4l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L12.6 4.6A2 2 0 0 1 14 4'), P('M14 6v4a1 1 0 0 0 1 1h4'), P('M8 22v-7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1Z'), P('M6 14h.01')];
+export const Scissors = [C(6, 6, 3), P('M8.12 8.12 12 12'), P('M20 4 8.12 15.88'), C(6, 18, 3), P('M20 20 8.12 8.12'), P('M12 12 6 6')];
+export const Search = [C(11, 11, 8), P('m21 21-4.3-4.3')];
+export const Settings = [P('M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'), C(12, 12, 3)];
+export const Share2 = [C(18, 5, 3), C(6, 12, 3), C(18, 19, 3), L(8.59, 13.51, 15.42, 17.49), L(15.41, 6.51, 8.59, 10.49)];
+export const SlidersHorizontal = [L(21, 4, 14, 4), L(10, 4, 3, 4), L(21, 12, 12, 12), L(8, 12, 3, 12), L(21, 20, 16, 20), L(12, 20, 3, 20), L(14, 2, 14, 6), L(8, 10, 8, 14), L(16, 18, 16, 22)];
+export const Sun = [C(12, 12, 4), P('M12 2v2'), P('M12 20v2'), P('m4.93 4.93 1.41 1.41'), P('m17.66 17.66 1.41 1.41'), P('M2 12h2'), P('M20 12h2'), P('m6.34 17.66-1.41 1.41'), P('m19.07 4.93-1.41 1.41')];
+export const Table = [R(3, 3, 18, 18, 2), P('M3 9h18'), P('M3 15h18'), P('M12 3v18')];
+export const Trash2 = [P('M3 6h18'), P('M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6'), P('M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'), L(10, 11, 10, 17), L(14, 11, 14, 17)];
+export const TriangleAlert = [P('m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z'), P('M12 9v4'), P('M12 17h.01')];
+export const Type = [POLY('4 7 4 4 20 4 20 7'), L(9, 20, 15, 20), L(12, 4, 12, 20)];
+export const Undo2 = [P('M9 14 4 9l5-5'), P('M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11')];
+export const Upload = [P('M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'), POLY('17 8 12 3 7 8'), P('M12 3v12')];
+export const User = [P('M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'), C(12, 7, 4)];
+export const Users = [P('M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'), C(9, 7, 4), P('M22 21v-2a4 4 0 0 0-3-3.87'), P('M16 3.13a4 4 0 0 1 0 7.75')];
+export const X = [L(18, 6, 6, 18), L(6, 6, 18, 18)];
+export const ZoomIn = [C(11, 11, 8), P('m21 21-4.3-4.3'), L(11, 8, 11, 14), L(8, 11, 14, 11)];
+export const ZoomOut = [C(11, 11, 8), P('m21 21-4.3-4.3'), L(8, 11, 14, 11)];
+export const Expand = [P('M15 3h6v6'), P('M9 21H3v-6'), P('M21 3l-7 7'), P('M3 21l7-7')];
+export const Focus = [C(12, 12, 3), P('M3 7V5a2 2 0 0 1 2-2h2'), P('M17 3h2a2 2 0 0 1 2 2v2'), P('M21 17v2a2 2 0 0 1-2 2h-2'), P('M7 21H5a2 2 0 0 1-2-2v-2')];
+export const FlipHorizontal2 = [P('m3 7 5 5-5 5V7'), P('m21 7-5 5 5 5V7'), P('M12 20v-16')];
+export const Move = [P('M12 2v20'), P('M2 12h20'), POLY('m9 5 3-3 3 3'), POLY('m9 19 3 3 3-3'), POLY('m5 9-3 3 3 3'), POLY('m19 9 3 3-3 3')];
+export const Grid3x3 = [R(3, 3, 7, 7, 1), R(14, 3, 7, 7, 1), R(14, 14, 7, 7, 1), R(3, 14, 7, 7, 1)];
+export const Palette = [C(13.5, 8.5, 0.5), C(8.5, 7.5, 0.5), C(6.5, 12.5, 0.5), C(10.5, 15.5, 0.5), P('M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z')];
+export const Contrast = [C(12, 12, 10), P('M12 18a6 6 0 0 0 0-12v12z')];
+export const Scan = [P('M3 7V5a2 2 0 0 1 2-2h2'), P('M17 3h2a2 2 0 0 1 2 2v2'), P('M21 17v2a2 2 0 0 1-2 2h-2'), P('M7 21H5a2 2 0 0 1-2-2v-2'), L(7, 12, 17, 12)];
+export const Sparkles = [P('M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z'), P('M20 3v4'), P('M22 5h-4'), P('M4 17v2'), P('M5 18H3')];
+export const CircleDot = [C(12, 12, 10), C(12, 12, 1)];
+export const Crosshair = [C(12, 12, 10), L(22, 12, 18, 12), L(6, 12, 2, 12), L(12, 6, 12, 2), L(12, 22, 12, 18)];
+export const Magnet = [P('m6 15-4-4 6.75-6.77a7.79 7.79 0 0 1 11 11L13 22l-4-4 6.39-6.36a2.14 2.14 0 0 0-3-3L6 15'), P('m5 8 4 4'), P('m12 15 4 4')];
+export const ListFilter = [P('M3 6h18'), P('M7 12h10'), P('M10 18h4')];
+export const Pencil = [P('M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'), P('m15 5 4 4')];
+export const ExternalLink = [P('M15 3h6v6'), P('M10 14 21 3'), P('M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6')];

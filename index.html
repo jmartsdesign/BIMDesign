@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="BIMDesign: modelagem de informação da construção offline no navegador, com projetos salvos localmente neste dispositivo." />
+    <title>BIMDesign</title>
+    <meta name="theme-color" content="#e9ebee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16191e" media="(prefers-color-scheme: dark)" />
+    <link rel="stylesheet" href="./src/styles/tokens.css" />
+    <link rel="stylesheet" href="./src/styles/base.css" />
+    <link rel="stylesheet" href="./src/styles/chrome.css" />
+    <link rel="stylesheet" href="./src/styles/panels.css" />
+    <link rel="stylesheet" href="./src/styles/dialogs.css" />
+    <script>
+      // Manifest and icons live in public/ (served at root by Vite/server.cjs).
+      // On file:// they would 404, so only add them when served over http(s).
+      if (location.protocol !== 'file:') {
+        const add = (tag) => document.head.append(tag);
+        const mk = (rel, href, extra) => { const l = document.createElement('link'); l.rel = rel; l.href = href; if (extra) Object.assign(l, extra); return l; };
+        add(mk('manifest', './manifest.json'));
+        add(mk('icon', './icons/icon-32.png', { type: 'image/png', sizes: '32x32' }));
+        add(mk('icon', './icons/icon-192.png', { type: 'image/png', sizes: '192x192' }));
+        add(mk('apple-touch-icon', './icons/apple-touch-icon.png'));
+      }
+    </script>
+    <script>
+      // Apply a forced theme before first paint to avoid a flash.
+      try {
+        var t = localStorage.getItem('bd.theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <!-- file://: use the bundled classic script (no ES module imports needed).
+         http(s): use the ES module entry (works with Vite dev server). -->
+    <script type="module">
+      if (location.protocol !== 'file:') import('./src/main.js');
+    </script>
+    <script>
+      if (location.protocol === 'file:') {
+        const bundle = document.createElement('script');
+        bundle.src = './bundle.js';
+        document.head.append(bundle);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>O BIMDesign precisa de JavaScript para funcionar.</noscript>
+  </body>
+</html>

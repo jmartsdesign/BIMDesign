@@ -1,0 +1,30 @@
+{
+  "name": "bimdesign",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "BIMDesign: modelagem BIM offline no navegador, com projetos guardados localmente no dispositivo.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "earcut": "3.2.4",
+    "lucide": "1.55.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "axe-core": "4.14.0",
+    "jsdom": "30.1.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.4"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

@@ -1,0 +1,5 @@
+
+BIMDesign
+
+Aplicativo BIM offline, em português, que funciona diretamente no navegador.
+Os projetos devem ser abertos e salvos apenas no dispositivo local.
