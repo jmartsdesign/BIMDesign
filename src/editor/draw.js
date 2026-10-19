@@ -38,6 +38,7 @@ import { icon } from '../ui/icons.js';
 import { newId } from '../core/doc.js';
 import { STAIR_SHAPES } from '../core/stairs.js';
 import { MM_PER_FOOT } from '../core/units.js';
+import { delaunay } from '../core/topography.js';
 
 export const REGION_PATTERNS = [
   { value: 'diag', label: 'Diagonal' },
@@ -986,6 +987,154 @@ export class SketchTool extends Tool {
         strokeModel(ctx, [pts.at(-1), this.cursor], S, color, 1.5, [6, 4]);
         drawTempDim(ctx, S(pts.at(-1)), S(this.cursor), this.fmt(dist(pts.at(-1), this.cursor)), color, vp.theme, -20);
       }
+      for (const p of pts) {
+        const s = S(p);
+        ctx.fillStyle = color;
+        ctx.fillRect(s.x - 3, s.y - 3, 6, 6);
+      }
+    }
+    this.drawSnap(ctx, vc, vp);
+  }
+}
+
+// Topography ---------------------------------------------------------------------------------------
+
+export class TopographyTool extends Tool {
+  get viewKinds() {
+    return ['plan'];
+  }
+
+  constructor(app, opts) {
+    super(app, opts);
+    this.mode = 'contours';
+    this.elevation = app.doc.get(app.activeLevelId())?.elevation || 0;
+    this.points = [];
+    this.contours = [];
+    this.cursor = null;
+    this.closed = false;
+  }
+
+  get title() {
+    return 'Criar Terreno';
+  }
+
+  get prompt() {
+    return this.mode === 'boundary'
+      ? 'Desenhe o limite do terreno no plano; os vértices usam a cota definida.'
+      : 'Desenhe pontos consecutivos de uma curva de nível; Enter ou duplo clique inicia a próxima curva.';
+  }
+
+  options() {
+    const mode = h('select.input.sm', { 'aria-label': 'Modo de desenho do terreno' },
+      h('option', { value: 'contours', selected: this.mode === 'contours' }, 'Linhas de nível'),
+      h('option', { value: 'boundary', selected: this.mode === 'boundary' }, 'Limite poligonal'));
+    mode.value = this.mode;
+    mode.addEventListener('change', () => {
+      this.mode = mode.value;
+      this.points = [];
+      this.contours = [];
+      this.closed = false;
+      this.app.setPrompt(this.prompt);
+      this.app.requestRender();
+    });
+    return [
+      h('div.ob-group', h('label', 'Modo'), mode),
+      lengthField(this, 'Cota da linha/vértice', this.elevation, (v) => (this.elevation = v)),
+      finishCancel(this),
+    ];
+  }
+
+  down(ev) {
+    const p = this.snap(ev, this.points.at(-1) || null);
+    if (!p) return;
+    if (this.mode === 'boundary' && this.points.length >= 3 && dist(p, this.points[0]) <= 8 * this.vc.mmPerPx()) {
+      this.closed = true;
+      this.app.setPrompt('Limite fechado. Clique em Concluir para criar o terreno.');
+      return;
+    }
+    if (this.closed || (this.points.length && dist(p, this.points.at(-1)) < 1)) return;
+    this.points.push(p);
+    this.app.requestRender();
+  }
+
+  move(ev) {
+    this.cursor = this.snap(ev, this.points.at(-1) || null);
+    this.app.requestRender();
+  }
+
+  finishCurrentContour() {
+    if (this.points.length < 2) return false;
+    this.contours.push({ elevation: this.elevation, points: this.points.map((p) => [...p]) });
+    this.points = [];
+    this.app.setPrompt('Curva registada; defina a cota seguinte ou clique em Concluir.');
+    this.app.requestRender();
+    return true;
+  }
+
+  key(e) {
+    if (e.key === 'Backspace' && this.points.length) {
+      e.preventDefault();
+      this.points.pop();
+      this.closed = false;
+      this.app.requestRender();
+      return true;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (this.mode === 'boundary') this.finish();
+      else this.finishCurrentContour();
+      return true;
+    }
+    return false;
+  }
+
+  dblclick() {
+    if (this.mode === 'boundary') this.finish();
+    else this.finishCurrentContour();
+  }
+
+  finish() {
+    if (this.mode === 'contours' && this.points.length) this.finishCurrentContour();
+    const boundary = this.mode === 'boundary' ? cleanPolygon(this.points, 0.5) : [];
+    if (this.mode === 'boundary' && (boundary.length < 3 || Math.abs(signedArea(boundary)) < 1000)) {
+      return this.app.toast('O limite do terreno precisa de pelo menos três vértices e uma área válida.', { kind: 'error' });
+    }
+    const contours = this.mode === 'boundary' ? [] : this.contours;
+    const points = this.mode === 'boundary'
+      ? boundary.map((p) => [p[0], p[1], this.elevation])
+      : contours.flatMap((c) => c.points.map((p) => [p[0], p[1], c.elevation]));
+    const unique = new Set(points.map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`));
+    if (unique.size > 5000) return this.app.toast('O terreno pode ter no máximo 5.000 pontos para manter a triangulação interativa.', { kind: 'error' });
+    if (unique.size < 3 || !delaunay(points).length) {
+      return this.app.toast('Desenhe pelo menos três pontos não colineares em posições diferentes.', { kind: 'error' });
+    }
+    const minZ = Math.min(...points.map((p) => p[2]));
+    this.app.commit(this.title, () => this.doc.add({
+      kind: 'topography',
+      levelId: this.app.activeLevelId(),
+      points,
+      contours,
+      boundary,
+      role: 'existing',
+      contourInterval: 500,
+      baseElevation: minZ - 3000,
+      mark: '',
+    }));
+    this.app.cancelTool();
+  }
+
+  cancel() {
+    return true;
+  }
+
+  drawOverlay(ctx, vc, vp) {
+    const S = (p) => vc.modelToScreen(p);
+    const color = vp.theme.preview;
+    for (const contour of this.contours) strokeModel(ctx, contour.points, S, color, 1.5);
+    const pts = this.points.slice();
+    if (pts.length) {
+      strokeModel(ctx, pts, S, color, 2, null, this.closed);
+      if (this.cursor && !this.closed) strokeModel(ctx, [pts.at(-1), this.cursor], S, color, 1.5, [6, 4]);
       for (const p of pts) {
         const s = S(p);
         ctx.fillStyle = color;

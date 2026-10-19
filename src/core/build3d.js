@@ -5,13 +5,14 @@
  * ctx: { doc, walls: WallSolver, material(id) }
  */
 import { MeshBuilder, Frame, hexToRgba } from './mesh.js';
-import { add, scale, sub, dot, norm, perp, len, clipHalfPlane, triangulate } from './geom.js';
+import { add, scale, sub, dot, norm, perp, len, clipHalfPlane, triangulate, pointInPolygon, distToSegment } from './geom.js';
 import { verticalExtent, openingSize, hostedBy, levelElevation, stairLayout, rampExtent, wallAxis } from './model.js';
 import { axisParam, hubsOf } from './walls.js';
 import { typeThickness } from './catalog.js';
 import { roofFaces, roofHeightAt, verticalThickness, planeHeight, edgeProfile } from './roof.js';
 import { buildFamily } from './families.js';
 import { stairFlights, flightOutline } from './stairs.js';
+import { terrainBoundary, terrainHeightAt, terrainFaces } from './topography.js';
 
 export function materialColor(ctx, id, fallback = '#c8c8c8') {
   const m = id ? ctx.material(id) : null;
@@ -50,6 +51,8 @@ export function build3D(ctx, el) {
       return buildStair(ctx, el);
     case 'ramp':
       return buildRamp(ctx, el);
+    case 'topography':
+      return buildTopography(ctx, el);
     case 'railing':
       return buildRailing(ctx, el);
     case 'component':
@@ -696,6 +699,58 @@ function buildRamp(ctx, el) {
   const b = new MeshBuilder();
   b.extrudeProfile(profile, origin, g.dir, g.width, materialColor(ctx, el.materialId || 'mat-concrete'));
   return b.build();
+}
+
+function buildTopography(ctx, el) {
+  const points = el.points || [];
+  const faces = terrainFaces(el);
+  if (points.length < 3 || !faces.length) return null;
+  const col = materialColor(ctx, el.materialId, '#91a879');
+  const boundary = terrainBoundary(el);
+  const minZ = Math.min(...points.map((p) => p[2]));
+  const base = Number.isFinite(+el.baseElevation) ? +el.baseElevation : minZ - 3000;
+  const b = new MeshBuilder();
+  for (const face of faces)
+    for (let i = 1; i + 1 < face.length; i++) {
+      const [a, c, d] = [face[0], face[i], face[i + 1]];
+      const normal = norm3(cross3(sub3(c, a), sub3(d, a)));
+      const up = normal[2] < 0 ? [d, c, a] : [a, c, d];
+      b.tri(up[0], up[1], up[2], col);
+    }
+  if (boundary.length >= 3) {
+    const zAt = (p) => terrainHeightAt(el, p[0], p[1]) ?? minZ;
+    const inOrOnBoundary = (p) => pointInPolygon(p, boundary) || boundary.some((a, i) => distToSegment(p, a, boundary[(i + 1) % boundary.length]) < 1);
+    const openings = [...(el.holes || []), ...(el.modifiers || []).filter((m) => m.operation === 'subtract').map((m) => m.polygon)]
+      .filter((poly) => poly?.length >= 3 && poly.every(inOrOnBoundary));
+    b.horizontal(boundary, openings, base, false, col);
+    for (let i = 0; i < boundary.length; i++) {
+      const a = boundary[i];
+      const q = boundary[(i + 1) % boundary.length];
+      const za = zAt(a);
+      const zq = zAt(q);
+      b.quad([a[0], a[1], base], [q[0], q[1], base], [q[0], q[1], zq], [a[0], a[1], za], col);
+      b.edge([a[0], a[1], za], [q[0], q[1], zq]);
+    }
+    for (const hole of openings) for (let i = 0; i < hole.length; i++) {
+      const a = hole[i];
+      const q = hole[(i + 1) % hole.length];
+      b.quad([a[0], a[1], base], [q[0], q[1], base], [q[0], q[1], zAt(q)], [a[0], a[1], zAt(a)], col);
+    }
+  }
+  return b.build();
+}
+
+function sub3(a, b) {
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
+
+function cross3(a, b) {
+  return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+}
+
+function norm3(a) {
+  const l = Math.hypot(...a);
+  return l > 1e-9 ? a.map((v) => v / l) : [0, 0, 1];
 }
 
 function buildFlight(b, el, type, f, g, th, col, ctx) {

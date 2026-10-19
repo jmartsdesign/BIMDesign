@@ -47,6 +47,7 @@ const ENTITY = {
   beam: (g, n, p, r, tag) => `IFCBEAM('${g}',$,${n},$,$,${p},${r},${tag},.BEAM.)`,
   stair: (g, n, p, r, tag) => `IFCSTAIR('${g}',$,${n},$,$,${p},${r},${tag},.STRAIGHT_RUN_STAIR.)`,
   ramp: (g, n, p, r, tag) => `IFCRAMP('${g}',$,${n},$,$,${p},${r},${tag},.STRAIGHT_RUN_RAMP.)`,
+  topography: (g, n, p, r, tag) => `IFCGEOGRAPHICELEMENT('${g}',$,${n},$,$,${p},${r},${tag},.TERRAIN.)`,
   railing: (g, n, p, r, tag) => `IFCRAILING('${g}',$,${n},$,$,${p},${r},${tag},.HANDRAIL.)`,
   furniture: (g, n, p, r, tag) => `IFCFURNITURE('${g}',$,${n},$,$,${p},${r},${tag},.NOTDEFINED.)`,
   plumbing: (g, n, p, r, tag) => `IFCSANITARYTERMINAL('${g}',$,${n},$,$,${p},${r},${tag},.NOTDEFINED.)`,

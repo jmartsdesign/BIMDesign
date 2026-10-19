@@ -4,7 +4,7 @@
  * (called inside a live transaction with the snapped pointer point) or a
  * click handler.
  */
-import { add, sub, scale, perp, mid, dot, eq } from '../core/geom.js';
+import { add, sub, scale, perp, mid, dot, eq, dist } from '../core/geom.js';
 import { wallAxis, openingSize } from '../core/model.js';
 import { sectionFrame } from '../core/plan.js';
 import { dimensionGeometry } from '../core/plan.js';
@@ -135,6 +135,28 @@ export function gripsFor(app, el, vc) {
           }),
         );
         break;
+      case 'topography': {
+        const points = el.points || [];
+        if (points.length <= 160) points.forEach((v, i) => out.push({
+          at: [v[0], v[1]],
+          shape: 'square',
+          title: 'Arrastar ponto do terreno',
+          exclude: [el.id],
+          drag: (p) => updateTerrainPoint(doc, el, i, [p[0], p[1], v[2]]),
+        }));
+        (el.boundary || []).forEach((v, i) => out.push({
+          at: v,
+          shape: 'diamond',
+          title: 'Arrastar limite do terreno',
+          exclude: [el.id],
+          drag: (p) => {
+            const boundary = el.boundary.slice();
+            boundary[i] = p;
+            doc.update(el.id, { boundary });
+          },
+        }));
+        break;
+      }
       case 'railing':
         (el.path || []).forEach((v, i) =>
           out.push({
@@ -186,7 +208,35 @@ export function gripsFor(app, el, vc) {
       });
     } else if (el.kind === 'detailLine') {
       for (const end of ['a', 'b']) out.push({ at: el[end], shape: 'circle', title: 'Arrastar ponta', drag: (p) => doc.update(el.id, { [end]: p }) });
+    } else if (el.kind === 'topography') {
+      const frame = vc.frame();
+      const points = el.points || [];
+      if (points.length <= 160) points.forEach((v, i) => {
+        const depth = dot(sub([v[0], v[1]], frame.origin), frame.look);
+        out.push({
+          at: [dot(sub([v[0], v[1]], frame.origin), frame.right), v[2]],
+          shape: 'square',
+          title: 'Arrastar cota do ponto',
+          exclude: [el.id],
+          drag: (p) => updateTerrainPoint(doc, el, i, [
+            frame.origin[0] + frame.right[0] * p[0] + frame.look[0] * depth,
+            frame.origin[1] + frame.right[1] * p[0] + frame.look[1] * depth,
+            p[1],
+          ]),
+        });
+      });
     }
   }
   return out;
+}
+
+function updateTerrainPoint(doc, terrain, index, point) {
+  const points = terrain.points.map((p) => (p === terrain.points[index] ? point : p));
+  const old = terrain.points[index];
+  const boundary = terrain.boundary?.map((p) => (dist(p, old) < 0.5 ? point.slice(0, 2) : p));
+  const contours = terrain.contours?.map((c) => ({
+    ...c,
+    points: c.points.map((p) => (dist(p, old) < 0.5 ? point.slice(0, 2) : p)),
+  }));
+  doc.update(terrain.id, { points, ...(boundary ? { boundary } : {}), ...(contours ? { contours } : {}) });
 }

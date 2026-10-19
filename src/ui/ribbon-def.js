@@ -38,6 +38,16 @@ export const RIBBON = [
     ],
   },
   {
+    id: 'topography',
+    label: 'Topografia',
+    panels: [
+      { title: 'Terreno', items: [{ cmd: 'topographyDraw', size: 'lg' }] },
+      { title: 'Importar', items: [{ cmd: 'importTopography', size: 'lg' }] },
+      { title: 'Implantação', items: [{ cmd: 'sitePlan', size: 'lg' }] },
+      { title: 'Operações', items: [{ cmd: 'terrainUnion' }, { cmd: 'terrainSubtract' }, { cmd: 'terrainCutFill' }] },
+    ],
+  },
+  {
     id: 'struct',
     label: 'Estrutura',
     panels: [

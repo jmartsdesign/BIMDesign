@@ -6,6 +6,7 @@ import { openingSize, verticalExtent, levelOf, stairLayout } from './model.js';
 import { typeThickness, KIND_LABEL, CATEGORIES } from './catalog.js';
 import { area as polyArea, perimeter, dist } from './geom.js';
 import { formatLength, formatArea, formatVolume } from './units.js';
+import { terrainBoundary } from './topography.js';
 
 const typeName = (el, c) => c.doc.get(el.typeId)?.name ?? '';
 const famName = (el, c) => c.doc.get(el.typeId)?.familyName ?? KIND_LABEL[el.kind] ?? '';
@@ -102,6 +103,20 @@ export const SCHEDULE_CATEGORIES = {
       COUNT,
     ],
     defaults: ['type', 'level', 'area', 'volume'],
+  },
+  topography: {
+    label: 'Terrenos',
+    kinds: ['topography'],
+    fields: [
+      F('name', 'Nome', (el) => el.name || 'Terreno'),
+      F('role', 'Estado', (el) => el.role === 'proposed' ? 'Proposto' : 'Existente'),
+      F('level', 'Pavimento de Referência', lvlName),
+      F('area', 'Área de Implantação', (el) => polyArea(terrainBoundary(el)), 'area'),
+      F('points', 'Pontos', (el) => el.points?.length ?? 0, 'number'),
+      F('interval', 'Intervalo entre Curvas', (el) => el.contourInterval ?? 500, 'length'),
+      COUNT,
+    ],
+    defaults: ['name', 'role', 'level', 'area', 'points', 'interval'],
   },
   component: {
     label: 'Móveis e Louças',
