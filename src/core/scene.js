@@ -15,7 +15,7 @@ import { build3D } from './build3d.js';
 import { planGraphics, planContext, columnOutline, hiddenInView } from './plan.js';
 import { hostedBy } from './model.js';
 
-export const MODEL_KINDS = ['wall', 'floor', 'ceiling', 'roof', 'door', 'window', 'column', 'beam', 'stair', 'ramp', 'railing', 'component'];
+export const MODEL_KINDS = ['wall', 'floor', 'ceiling', 'roof', 'door', 'window', 'column', 'beam', 'stair', 'ramp', 'topography', 'railing', 'component'];
 export const PLAN_KINDS = [...MODEL_KINDS, 'room', 'roomSeparator', 'grid', 'region', 'dimension', 'text', 'tag', 'detailLine', 'section', 'elevation'];
 
 const LEVEL_SCOPED = new Set(['wall', 'roomSeparator', 'column', 'room', 'floor', 'ceiling', 'roof', 'stair', 'ramp', 'railing', 'component', 'beam']);

@@ -1491,6 +1491,12 @@ export class App {
   importDXF() {
     return files.importDXF(this);
   }
+  importTopography() {
+    return files.importTopography(this);
+  }
+  topographyImportOptions(name) {
+    return dialogs.topographyImportOptions(this, name);
+  }
   scheduleFieldsDialog(id) {
     return dialogs.scheduleFieldsDialog(this, id);
   }

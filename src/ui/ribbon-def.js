@@ -32,6 +32,7 @@ export const RIBBON = [
         ],
       },
       { title: 'Circulação', items: [{ cmd: 'railing', size: 'lg' }, { cmd: 'stair', size: 'lg' }, { cmd: 'ramp', size: 'lg' }] },
+      { title: 'Topografia', items: [{ cmd: 'topographyDraw', size: 'lg' }, { cmd: 'sitePlan' }] },
       { title: 'Ambiente', items: [{ cmd: 'room', size: 'lg' }, { cmd: 'roomSeparator', size: 'lg' }, { cmd: 'rooms-auto' }, { cmd: 'tag' }, { cmd: 'roomFill' }] },
       { title: 'Abertura', items: [{ cmd: 'opening', size: 'lg' }, { cmd: 'shaft', size: 'lg' }] },
       { title: 'Referência', items: [{ cmd: 'level', size: 'lg' }, { cmd: 'grid', size: 'lg' }] },
@@ -42,6 +43,7 @@ export const RIBBON = [
     label: 'Estrutura',
     panels: [
       { title: 'Estrutura', items: [{ cmd: 'beam', size: 'lg' }, { cmd: 'wallStructural', size: 'lg' }, { cmd: 'column', size: 'lg' }, { cmd: 'floor', size: 'lg' }] },
+      { title: 'Terreno', items: [{ cmd: 'terrainUnion' }, { cmd: 'terrainSubtract' }, { cmd: 'terrainCutFill' }] },
       { title: 'Referência', items: [{ cmd: 'level', size: 'lg' }, { cmd: 'grid', size: 'lg' }] },
     ],
   },
@@ -49,7 +51,7 @@ export const RIBBON = [
     id: 'insert',
     label: 'Inserir',
     panels: [
-      { title: 'Importar', items: [{ cmd: 'importDxf', size: 'lg' }] },
+      { title: 'Importar', items: [{ cmd: 'importDxf', size: 'lg' }, { cmd: 'importTopography', size: 'lg' }] },
       { title: 'Projeto', items: [{ cmd: 'open', size: 'lg' }, { cmd: 'sample', size: 'lg' }] },
       { title: 'Biblioteca', items: [{ cmd: 'component', size: 'lg' }, { cmd: 'types', size: 'lg' }] },
     ],
@@ -76,6 +78,7 @@ export const RIBBON = [
           { cmd: 'section', size: 'lg' },
           { cmd: 'elevation', size: 'lg' },
           { cmd: 'planViews', size: 'lg' },
+          { cmd: 'sitePlan', size: 'lg' },
           { cmd: 'duplicateView', size: 'lg' },
           { cmd: 'schedule', size: 'lg' },
         ],

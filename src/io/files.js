@@ -9,6 +9,7 @@ import {
   acquireSessionLock,
 } from './storage.js';
 import { scheduleRows, scheduleColumns, toCSV } from '../core/schedule.js';
+import { parseTopographyText } from '../core/topography.js';
 
 // Recovery ---------------------------------------------------------------------------------
 
@@ -166,6 +167,50 @@ export async function importDXF(app) {
   app.select(ids);
   app.vc?.zoomExtents?.(true, new Set(ids));
   toast(`Importadas ${lines.length} linhas e ${texts.length} textos em ${target.name}. Elas estão selecionadas: mova-as para o lugar com Mover (MV).`);
+}
+
+/** Import XYZ samples and optional contour identifiers from TXT or CSV. */
+export async function importTopography(app) {
+  if (!app.activeView || app.activeView.kind !== 'plan') {
+    const plan = app.doc.all('plan').find((view) => view.levelId === app.activeLevelId()) || app.doc.all('plan')[0];
+    if (plan) app.openView(plan.id);
+    else if (!app.requirePlan()) return;
+  }
+  const file = await pickFile('.txt,.csv,.tsv,.xyz');
+  if (!file) return;
+  const options = await app.topographyImportOptions(file.name);
+  if (!options) return;
+  let parsed;
+  try {
+    parsed = parseTopographyText(await file.text(), options.scale);
+  } catch (err) {
+    return toast(`Não foi possível importar o terreno: ${err.message || err}`, { kind: 'error', timeout: 0 });
+  }
+  const name = file.name.replace(/\.[^.]+$/, '');
+  const minZ = Math.min(...parsed.points.map((p) => p[2]));
+  let terrain;
+  app.commit('Importar Topografia', () => {
+    terrain = app.doc.add({
+      kind: 'topography',
+      name,
+      levelId: options.levelId || app.activeLevelId(),
+      points: parsed.points,
+      contours: parsed.contours,
+      boundary: [],
+      holes: [],
+      modifiers: [],
+      role: 'existing',
+      contourInterval: 500,
+      baseElevation: minZ - 3000,
+      mark: '',
+    });
+  });
+  if (!terrain) return;
+  const targetPlan = app.doc.all('plan').find((view) => view.sitePlan) || app.doc.all('plan').find((view) => view.levelId === terrain.levelId);
+  if (targetPlan && targetPlan.id !== app.activeViewId) app.openView(targetPlan.id);
+  app.select([terrain.id]);
+  app.vc?.zoomExtents?.(true, new Set([terrain.id]));
+  toast(`Importados ${parsed.points.length} pontos topográficos${parsed.contours.length ? ` e ${parsed.contours.length} linhas de nível` : ''}.`, { kind: 'success' });
 }
 
 // Exports --------------------------------------------------------------------------------------

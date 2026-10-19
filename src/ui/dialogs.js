@@ -114,6 +114,36 @@ export function levelsDialog(app) {
   return openDialog({ title: 'Pavimentos', body, size: 'md', actions: [{ label: 'Fechar', primary: true, value: null }] });
 }
 
+export async function topographyImportOptions(app, fileName) {
+  const units = h('select.input', { 'aria-label': 'Unidade de coordenadas do ficheiro' },
+    h('option', { value: '1000' }, 'Metros'),
+    h('option', { value: '1' }, 'Milímetros'),
+    h('option', { value: '304.8' }, 'Pés'),
+  );
+  units.value = '1000';
+  const level = h('select.input', { 'aria-label': 'Pavimento do terreno' });
+  for (const lv of app.doc.levels()) level.append(h('option', { value: lv.id, selected: lv.id === app.activeLevelId() }, lv.name));
+  level.value = app.activeLevelId() || app.doc.levels()[0]?.id || '';
+  let result = null;
+  await openDialog({
+    title: 'Importar Topografia',
+    size: 'sm',
+    body: h('div',
+      h('p.field-hint', `As colunas X, Y e Z serão detetadas automaticamente em ${fileName}.`),
+      field('Unidade das coordenadas', units),
+      field('Pavimento de referência', level),
+    ),
+    actions: [
+      { label: 'Cancelar', value: null },
+      { label: 'Importar', primary: true, onClick: () => {
+        result = { scale: +units.value, levelId: level.value };
+        return true;
+      } },
+    ],
+  });
+  return result;
+}
+
 // Type editor ---------------------------------------------------------------------------------
 
 export function typeDialog(app, type) {

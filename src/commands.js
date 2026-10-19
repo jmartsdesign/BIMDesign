@@ -20,6 +20,7 @@ import {
   SectionTool,
   ElevationTool,
   LevelTool,
+  TopographyTool,
   placeRoomsAutomatically,
   tagAll,
 } from './editor/draw.js';
@@ -36,10 +37,45 @@ import {
   MatchTypeTool,
   ZoomRegionTool,
 } from './editor/modify.js';
-import { deleteElements } from './core/ops.js';
+import { deleteElements, uniqueName } from './core/ops.js';
+import { planView } from './core/template.js';
+import { terrainCutFill, withTerrainModifier } from './core/topography.js';
+import { formatVolume } from './core/units.js';
 
 const tool = (Cls, opts = {}) => (app, args) => app.startTool(Cls, { ...opts, ...(args || {}) });
 const hasSel = (app) => app.selection.size > 0;
+const requireFloorPlan = (app) => {
+  if (app.activeView?.kind === 'plan') return true;
+  const plan = app.doc.all('plan').find((view) => view.levelId === app.activeLevelId()) || app.doc.all('plan')[0];
+  if (plan) {
+    app.openView(plan.id);
+    return true;
+  }
+  return app.requirePlan();
+};
+const terrainBoolean = (app, operation) => {
+  const selected = [...app.selection].map((id) => app.doc.get(id)).filter(Boolean);
+  const terrain = selected.find((el) => el.kind === 'topography');
+  const structure = selected.find((el) => el.kind !== 'topography');
+  if (!terrain || !structure || selected.length !== 2) return app.toast('Selecione um terreno e um elemento estrutural para executar a operação.', { kind: 'error' });
+  let patch;
+  try {
+    patch = withTerrainModifier(app.doc, terrain, structure, operation);
+  } catch (err) {
+    return app.toast(err.message || 'Não foi possível modificar o terreno.', { kind: 'error' });
+  }
+  const result = app.commit(operation === 'union' ? 'Unir estrutura ao terreno' : 'Subtrair estrutura do terreno', () => app.doc.update(terrain.id, patch));
+  if (result) app.toast(operation === 'union' ? 'Pegada estrutural unida à superfície do terreno.' : 'Pegada estrutural subtraída do terreno.', { kind: 'success' });
+};
+const terrainCutFillReport = (app) => {
+  const selected = [...app.selection].map((id) => app.doc.get(id)).filter((el) => el?.kind === 'topography');
+  if (selected.length !== 2) return app.toast('Selecione dois terrenos: um Existente e outro Proposto.', { kind: 'error' });
+  const existing = selected.find((el) => el.role === 'existing');
+  const proposed = selected.find((el) => el.role === 'proposed');
+  if (!existing || !proposed) return app.toast('Defina um terreno como Existente e o outro como Proposto nas propriedades.', { kind: 'error' });
+  const result = terrainCutFill(existing, proposed);
+  app.toast(`Corte: ${formatVolume(result.cut, app.doc.units)} · Aterro: ${formatVolume(result.fill, app.doc.units)} · Saldo (aterro − corte): ${formatVolume(result.net, app.doc.units)}.`, { kind: 'success', timeout: 0 });
+};
 
 export const COMMANDS = {
   // Arquivos
@@ -52,6 +88,7 @@ export const COMMANDS = {
   home: { label: 'Início', icon: 'house', run: (app) => app.showHome() },
   sample: { label: 'Abrir Projeto de Exemplo', icon: 'house', run: (app) => app.startProject('sample') },
   importDxf: { label: 'Importar CAD (DXF)', icon: 'importCad', run: (app) => app.importDXF(), desc: 'Trazer linhas e textos de um desenho DXF para a vista ativa, para decalcar' },
+  importTopography: { label: 'Importar Topografia TXT/CSV', icon: 'topography', run: (app) => app.importTopography(), desc: 'Importar pontos XYZ e curvas de nível de ficheiros delimitados' },
 
   // Editar
   undo: { label: 'Desfazer', icon: 'undo', accel: 'Ctrl+Z', run: (app) => app.undo(), enabled: (app) => app.doc?.canUndo },
@@ -103,6 +140,25 @@ export const COMMANDS = {
   roof: { label: 'Cobertura', icon: 'roof', run: tool(SketchTool, { kind: 'roof' }), desc: 'Cobertura por pegada' },
   stair: { label: 'Escada', icon: 'stair', run: tool(StairTool) },
   ramp: { label: 'Rampa', icon: 'ramp', keys: 'RA', run: tool(RampTool), desc: 'Desenhar uma rampa entre dois níveis' },
+  topographyDraw: { label: 'Desenhar Terreno', icon: 'topography', run: (app) => requireFloorPlan(app) && app.startTool(TopographyTool), desc: 'Criar uma superfície topográfica por curvas de nível ou limite poligonal' },
+  sitePlan: {
+    label: 'Planta de Implantação',
+    icon: 'planView',
+    run: (app) => {
+      const level = app.doc.get(app.activeLevelId()) || app.doc.levels()[0];
+      if (!level) return app.toast('Crie primeiro um pavimento para a planta de implantação.', { kind: 'error' });
+      let view = app.doc.all('plan').find((v) => v.sitePlan && v.levelId === level.id);
+      if (!view) {
+        app.commit('Criar Planta de Implantação', () => {
+          view = app.doc.add({ ...planView(app.doc, level), name: uniqueName(app.doc.all('plan').map((v) => v.name), 'Planta de Implantação'), sitePlan: true, underlay: null });
+        });
+      }
+      app.openView(view.id);
+    },
+  },
+  terrainUnion: { label: 'Unir Estrutura ao Terreno', icon: 'topography', enabled: (app) => app.selection.size === 2, run: (app) => terrainBoolean(app, 'union') },
+  terrainSubtract: { label: 'Subtrair Estrutura do Terreno', icon: 'topography', enabled: (app) => app.selection.size === 2, run: (app) => terrainBoolean(app, 'subtract') },
+  terrainCutFill: { label: 'Calcular Corte e Aterro', icon: 'topography', enabled: hasSel, run: terrainCutFillReport },
   railing: { label: 'Guarda-corpo', icon: 'railing', run: tool(SketchTool, { kind: 'railing' }) },
   room: { label: 'Ambiente', icon: 'room', keys: 'RM', run: tool(RoomTool) },
   roomSeparator: { label: 'Separador de Ambientes', icon: 'roomSeparator', run: tool(LineTool, { kind: 'roomSeparator' }) },

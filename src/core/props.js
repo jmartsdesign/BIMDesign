@@ -12,6 +12,7 @@ import { roofGeometry } from './build3d.js';
 import { area as polyArea, perimeter, dist } from './geom.js';
 import { scaleOptions } from './units.js';
 import { STAIR_SHAPES } from './stairs.js';
+import { terrainBoundary } from './topography.js';
 
 export const GROUPS = ['Restrições', 'Construção', 'Gráficos', 'Subjacente', 'Texto', 'Cotas', 'Estrutural', 'Dados de Identificação', 'Extensões', 'Câmera', 'Outros'];
 
@@ -166,6 +167,22 @@ const INSTANCE = {
       const g = rampExtent(c.doc, el);
       return g.length * g.width;
     }, 'area'),
+    mark,
+    comments,
+  ],
+  topography: [
+    P('levelId', 'Pavimento de Referência', 'Restrições', 'level'),
+    len('contourInterval', 'Intervalo entre Curvas de Nível', 'Gráficos', { get: (el) => el.contourInterval ?? 500, set: (_el, value) => ({ contourInterval: Math.max(1, +value) }) }),
+    len('baseElevation', 'Cota da Base', 'Construção'),
+    P('role', 'Estado do Terreno', 'Dados de Identificação', 'select', {
+      get: (el) => el.role || 'existing',
+      options: () => [{ value: 'existing', label: 'Existente' }, { value: 'proposed', label: 'Proposto' }],
+    }),
+    ro('pointCount', 'Pontos de Superfície', 'Cotas', (el) => el.points?.length ?? 0, 'number'),
+    ro('area', 'Área de Implantação', 'Cotas', (el) => polyArea(terrainBoundary(el)), 'area'),
+    ro('minElevation', 'Cota Mínima', 'Cotas', (el) => el.points?.length ? Math.min(...el.points.map((p) => p[2])) : 0),
+    ro('maxElevation', 'Cota Máxima', 'Cotas', (el) => el.points?.length ? Math.max(...el.points.map((p) => p[2])) : 0),
+    ro('modifierCount', 'Operações com Estruturas', 'Cotas', (el) => el.modifiers?.length ?? 0, 'number'),
     mark,
     comments,
   ],

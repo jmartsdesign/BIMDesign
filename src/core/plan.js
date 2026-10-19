@@ -17,6 +17,7 @@ import { buildFamily } from './families.js';
 import { Frame } from './mesh.js';
 import { categoryOf } from './catalog.js';
 import { formatDimension, formatArea } from './units.js';
+import { terrainBoundary, terrainContourSegments } from './topography.js';
 
 export const INK = (a = 255) => [-1, -1, -1, a];
 export const BG = [-2, -2, -2, 255];
@@ -164,6 +165,9 @@ export function planGraphics(pc, el) {
       break;
     case 'ramp':
       planRamp(pc, el, b);
+      break;
+    case 'topography':
+      planTopography(pc, el, b);
       break;
     case 'railing':
       planRailing(pc, el, b);
@@ -622,6 +626,30 @@ function planRamp(pc, el, b) {
   b.poly([sub(end, add(scale(forward, head), across)), end, sub(end, sub(scale(forward, head), across))], false, W.thin, dash);
   const goingUp = (atBase ? g.rise : -g.rise) >= 0;
   b.text(start, goingUp ? 'UP' : 'DN', { size: P(pc, 2.2), rot: readableAngle(angleOf(forward) - Math.PI / 2) });
+}
+
+function planTopography(pc, el, b) {
+  if (!pc.view.sitePlan && el.levelId !== pc.view.levelId) return;
+  const boundary = terrainBoundary(el);
+  if (boundary.length >= 3) {
+    b.poly(boundary, true, W.medium, 0, [90, 112, 73, 255]);
+    b.pick(boundary);
+  }
+  const points = el.points || [];
+  if (points.length < 3) return;
+  const zs = points.map((p) => p[2]);
+  const min = Math.min(...zs);
+  const max = Math.max(...zs);
+  const interval = Math.max(1, +el.contourInterval || 500, (max - min) / 250);
+  const start = Math.ceil(min / interval) * interval;
+  for (let z = start; z <= max + 1e-7; z += interval) {
+    const major = Math.round(z / interval) % 5 === 0;
+    for (const [a, c] of terrainContourSegments(el, z)) b.line(a, c, major ? W.medium : W.thin, 0, major ? [112, 119, 91, 255] : [145, 151, 128, 255]);
+  }
+  for (const contour of el.contours || []) {
+    if (contour.points?.length < 2) continue;
+    b.poly(contour.points, false, W.light, 0, [110, 125, 88, 255]);
+  }
 }
 
 function planRailing(pc, el, b) {

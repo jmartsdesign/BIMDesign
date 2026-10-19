@@ -26,6 +26,7 @@ Mantenha juntos os ficheiros da pasta transferida, incluindo `bundle.js`. Este f
 - As paredes podem ficar ligadas a uma cobertura e acompanhar as alterações à sua forma.
 - Aberturas de caixa que atravessam pisos, forros e coberturas ao longo de vários pavimentos.
 - Pilares, vigas, escadas retas, em L e em U com número automático de espelhos, patamares e corrimãos; rampas com largura, espessura e pavimento de chegada (ou altura definida); e guarda-corpos.
+- Terrenos triangulados a partir de pontos XYZ ou curvas de nível, com importação TXT/CSV, desenho de linhas de nível e limites poligonais, edição de pontos e cotas, curvas geradas, corte/aterro e união/subtração de pegadas estruturais.
 - Biblioteca de mobiliário, armários, louças sanitárias, eletrodomésticos, plantas e iluminação. O mobiliário colocado junto a uma parede fica orientado com a parte posterior virada para ela.
 - Ambientes colocados manual ou automaticamente, delimitados por paredes, pilares e linhas separadoras, com cálculo em tempo real de área, perímetro e volume.
 - Pavimentos e grelhas de eixos.
@@ -39,6 +40,7 @@ Mantenha juntos os ficheiros da pasta transferida, incluindo `bundle.js`. Este f
 
 **Vistas e documentação**
 - Plantas de pavimento e de forro com plano de corte, nível de detalhe, sobreposição do pavimento inferior, preenchimento colorido dos ambientes e controlo da visibilidade de categorias e elementos em cada vista.
+- Plantas de implantação que apresentam os terrenos e as respetivas curvas de nível, independentemente do pavimento de referência.
 - Vistas 3D com cubo de orientação, órbita, projeção em perspetiva ou ortográfica, caixa de corte e cinco estilos visuais.
 - Elevações e cortes gerados a partir do modelo, com preenchimento dos elementos cortados e anotação de pavimentos e grelhas.
 - Cotas alinhadas que acompanham as paredes medidas, texto, etiquetas, linhas de detalhe e regiões preenchidas.
@@ -49,6 +51,8 @@ Mantenha juntos os ficheiros da pasta transferida, incluindo `bundle.js`. Este f
 **Ficheiros**
 - Projetos (`.bdp`) abertos e guardados neste dispositivo; cópias locais de recuperação ajudam a preservar o trabalho após recarregar a página.
 - Importe desenhos DXF para uma planta, corte ou prancha como linhas de detalhe e texto, para os decalcar ou anotar.
+- Importe pontos topográficos em TXT, CSV, TSV ou XYZ: as colunas X, Y e Z são detetadas automaticamente e pode escolher a unidade de origem. Para desenhar manualmente, use **Desenhar Terreno**, escolha **Linhas de nível** ou **Limite poligonal** e introduza as cotas na barra de opções.
+- Selecione um terreno e um elemento estrutural para aplicar **Unir Estrutura ao Terreno** (elevar a superfície na pegada) ou **Subtrair Estrutura do Terreno** (recortar a pegada). Selecione um terreno existente e um proposto para calcular volumes de corte e aterro.
 - Exporte para IFC (IFC4, compatível com outros programas BIM), glTF e OBJ (3D), DXF (plantas), PDF, SVG e PNG (desenhos e pranchas) e CSV (tabelas).
 
 **Interface**
@@ -63,7 +67,8 @@ Mantenha juntos os ficheiros da pasta transferida, incluindo `bundle.js`. Este f
 3. Adicione portas (DR) e janelas (WN) movendo o cursor sobre uma parede. Prima Espaço para inverter a orientação.
 4. Crie um **Piso** ou uma **Cobertura** clicando numa parede do edifício e, em seguida, em **Concluir**.
 5. Use **Rampa** (RA), clique no início e no fim da projeção em planta e ajuste a largura, a espessura e o pavimento de chegada na barra de opções.
-6. Coloque ambientes (RM) e abra uma **Vista 3D**, elevação ou corte no Navegador de Projeto.
+6. Importe um levantamento TXT/CSV ou desenhe um terreno; use **Planta de Implantação** para abrir uma vista dedicada. Edite os pontos do terreno em planta e as cotas dos pontos em elevação.
+7. Coloque ambientes (RM) e abra uma **Vista 3D**, elevação ou corte no Navegador de Projeto.
 
 Navegação: a roda do rato amplia ou reduz em torno do cursor; o botão do meio desloca a vista. Em 3D, arraste com o botão direito (ou com Shift e o botão do meio) para orbitar. Em ecrãs táteis, use o gesto de pinça para ampliar ou reduzir, arraste com dois dedos para deslocar e com um dedo para orbitar em 3D. Prima F1 para consultar a ajuda e os atalhos.
 
