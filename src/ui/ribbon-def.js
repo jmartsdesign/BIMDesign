@@ -31,7 +31,7 @@ export const RIBBON = [
           { cmd: 'curtainWall', size: 'lg' },
         ],
       },
-      { title: 'Circulação', items: [{ cmd: 'railing', size: 'lg' }, { cmd: 'stair', size: 'lg' }] },
+      { title: 'Circulação', items: [{ cmd: 'railing', size: 'lg' }, { cmd: 'stair', size: 'lg' }, { cmd: 'ramp', size: 'lg' }] },
       { title: 'Ambiente', items: [{ cmd: 'room', size: 'lg' }, { cmd: 'roomSeparator', size: 'lg' }, { cmd: 'rooms-auto' }, { cmd: 'tag' }, { cmd: 'roomFill' }] },
       { title: 'Abertura', items: [{ cmd: 'opening', size: 'lg' }, { cmd: 'shaft', size: 'lg' }] },
       { title: 'Referência', items: [{ cmd: 'level', size: 'lg' }, { cmd: 'grid', size: 'lg' }] },

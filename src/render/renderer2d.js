@@ -23,6 +23,7 @@ export const KIND_Z = {
   room: 2,
   component: 3,
   stair: 4,
+  ramp: 4,
   railing: 4,
   beam: 5,
   wall: 6,

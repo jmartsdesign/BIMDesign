@@ -92,6 +92,7 @@ export function snapFeatures(scene, el) {
       break;
     }
     case 'stair':
+    case 'ramp':
       P(el.a);
       P(el.b);
       break;

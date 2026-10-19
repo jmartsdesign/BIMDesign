@@ -83,6 +83,7 @@ export function gripsFor(app, el, vc) {
       case 'roomSeparator':
       case 'beam':
       case 'stair':
+      case 'ramp':
         for (const end of ['a', 'b'])
           out.push({
             at: el[end],
@@ -189,4 +190,3 @@ export function gripsFor(app, el, vc) {
   }
   return out;
 }
-

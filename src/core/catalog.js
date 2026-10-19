@@ -18,6 +18,7 @@
  *   column       { typeId, levelId, at, rotation, baseOffset, topLevelId, topOffset, height }
  *   beam         { typeId, levelId, a, b, offset }
  *   stair        { typeId, levelId, topLevelId, baseOffset, topOffset, a, b, width }
+ *   ramp         { levelId, topLevelId, baseOffset, topOffset, height, a, b, width, thickness }
  *   railing      { typeId, levelId, path, offset }
  *   component    { typeId, levelId, at, rotation, offset }
  *   room         { levelId, at, name, number, upperOffset, tagAt }
@@ -45,6 +46,7 @@ export const CATEGORIES = [
   { id: 'columns', label: 'Pilares', model: true },
   { id: 'beams', label: 'Estrutura (Vigas)', model: true },
   { id: 'stairs', label: 'Escadas', model: true },
+  { id: 'ramps', label: 'Rampas', model: true },
   { id: 'railings', label: 'Guarda-corpos', model: true },
   { id: 'furniture', label: 'Móveis', model: true },
   { id: 'casework', label: 'Marcenaria', model: true },
@@ -74,6 +76,7 @@ const KIND_CATEGORY = {
   column: 'columns',
   beam: 'beams',
   stair: 'stairs',
+  ramp: 'ramps',
   railing: 'railings',
   room: 'rooms',
   roomSeparator: 'roomSeparators',
@@ -104,6 +107,7 @@ export const KIND_LABEL = {
   column: 'Pilar',
   beam: 'Viga',
   stair: 'Escada',
+  ramp: 'Rampa',
   railing: 'Guarda-corpo',
   component: 'Componente',
   room: 'Ambiente',

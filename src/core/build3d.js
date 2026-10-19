@@ -6,7 +6,7 @@
  */
 import { MeshBuilder, Frame, hexToRgba } from './mesh.js';
 import { add, scale, sub, dot, norm, perp, len, clipHalfPlane, triangulate } from './geom.js';
-import { verticalExtent, openingSize, hostedBy, levelElevation, stairLayout, wallAxis } from './model.js';
+import { verticalExtent, openingSize, hostedBy, levelElevation, stairLayout, rampExtent, wallAxis } from './model.js';
 import { axisParam, hubsOf } from './walls.js';
 import { typeThickness } from './catalog.js';
 import { roofFaces, roofHeightAt, verticalThickness, planeHeight, edgeProfile } from './roof.js';
@@ -48,6 +48,8 @@ export function build3D(ctx, el) {
       return buildBeam(ctx, el);
     case 'stair':
       return buildStair(ctx, el);
+    case 'ramp':
+      return buildRamp(ctx, el);
     case 'railing':
       return buildRailing(ctx, el);
     case 'component':
@@ -678,6 +680,21 @@ function buildStair(ctx, el) {
   const b = new MeshBuilder();
   for (const f of g.flights) buildFlight(b, el, type, f, g, th, col, ctx);
   for (const l of g.landings) b.prism(l.poly, [], l.z - (type.monolithic !== false ? th : 40), l.z, col);
+  return b.build();
+}
+
+function buildRamp(ctx, el) {
+  const g = rampExtent(ctx.doc, el);
+  if (g.length < 1) return null;
+  const origin = add(el.a, scale(g.side, -g.width / 2));
+  const profile = [
+    [0, g.base],
+    [g.length, g.top],
+    [g.length, g.top - g.thickness],
+    [0, g.base - g.thickness],
+  ];
+  const b = new MeshBuilder();
+  b.extrudeProfile(profile, origin, g.dir, g.width, materialColor(ctx, el.materialId || 'mat-concrete'));
   return b.build();
 }
 

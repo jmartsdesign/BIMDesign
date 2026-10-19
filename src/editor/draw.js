@@ -25,7 +25,7 @@ import {
   area as polyArea,
 } from '../core/geom.js';
 import { typeThickness } from '../core/catalog.js';
-import { wallAxis, openingSize, hostedBy, stairLayout } from '../core/model.js';
+import { wallAxis, openingSize, hostedBy, stairLayout, rampExtent } from '../core/model.js';
 import { planGraphics, planContext, tagAnchor, sectionFrame } from '../core/plan.js';
 import { nextMark, nextRoomNumber, nextGridName, uniqueName } from '../core/ops.js';
 import { VIEW_DEFAULTS, planView } from '../core/template.js';
@@ -268,6 +268,12 @@ export class WallTool extends Tool {
       this.start = this.o.chain ? p : null;
     }
     this.app.setPrompt(this.prompt);
+  }
+
+  dblclick() {
+    if (this.o.shape !== 'line' || !this.o.chain) return;
+    this.start = null;
+    this.app.cancelTool();
   }
 
   pick(ev) {
@@ -1096,6 +1102,131 @@ export class StairTool extends Tool {
   }
 }
 
+export class RampTool extends Tool {
+  get placingKind() {
+    return 'ramp';
+  }
+
+  constructor(app, opts) {
+    super(app, opts);
+    this.start = null;
+    this.cursor = null;
+    const levelId = app.activeLevelId();
+    this.o = app.toolOptions('ramp', {
+      width: 1200,
+      thickness: 150,
+      topLevelId: app.doc.levelAbove(levelId)?.id ?? null,
+      height: 1000,
+    });
+  }
+
+  get title() {
+    return 'Criar Rampa';
+  }
+
+  get prompt() {
+    return this.start ? 'Clique para definir o fim da rampa' : 'Clique no início da rampa';
+  }
+
+  options() {
+    const rerender = () => (this.app.renderOptions(), this.app.requestRender());
+    return [
+      lengthField(this, 'Largura', this.o.width, (v) => {
+        this.o.width = Math.max(1, v);
+        rerender();
+      }),
+      lengthField(this, 'Espessura', this.o.thickness, (v) => {
+        this.o.thickness = Math.max(1, v);
+        rerender();
+      }),
+      h(
+        'div.ob-group',
+        h('label', 'Pavimento de chegada'),
+        levelSelect(this.app, this.o.topLevelId || '', (v) => {
+          this.o.topLevelId = v;
+          rerender();
+        }, { none: 'Definir altura' }),
+      ),
+      !this.o.topLevelId ? lengthField(this, 'Altura da rampa', this.o.height, (v) => {
+        this.o.height = v;
+        rerender();
+      }) : null,
+      h('span.ob-sep'),
+      finishCancel(this),
+    ];
+  }
+
+  make(a, b) {
+    const levelId = this.app.activeLevelId();
+    const topLevelId = this.o.topLevelId && this.doc.has(this.o.topLevelId) ? this.o.topLevelId : null;
+    const el = {
+      kind: 'ramp',
+      levelId,
+      topLevelId,
+      baseOffset: 0,
+      topOffset: 0,
+      height: Number.isFinite(+this.o.height) ? +this.o.height : 1000,
+      a,
+      b,
+      width: Math.max(1, +this.o.width || 1200),
+      thickness: Math.max(1, +this.o.thickness || 150),
+      materialId: 'mat-concrete',
+    };
+    return { el, extent: rampExtent(this.doc, el) };
+  }
+
+  down(ev) {
+    const p = this.snap(ev, this.start);
+    if (!p) return;
+    if (!this.start) {
+      this.start = p;
+      this.app.setPrompt(this.prompt);
+      return;
+    }
+    if (dist(p, this.start) < 1) return;
+    const { el } = this.make(this.start, p);
+    this.app.commit('Rampa', () => this.doc.add(el));
+    this.start = null;
+    this.app.setPrompt(this.prompt);
+  }
+
+  finish() {
+    this.start = null;
+    this.app.cancelTool();
+  }
+
+  dblclick() {
+    this.finish();
+  }
+
+  move(ev) {
+    this.cursor = this.snap(ev, this.start);
+    this.app.requestRender();
+  }
+
+  cancel() {
+    if (this.start) {
+      this.start = null;
+      this.app.requestRender();
+      return false;
+    }
+    return true;
+  }
+
+  drawOverlay(ctx, vc, vp) {
+    if (this.start && this.cursor && dist(this.start, this.cursor) > 1) {
+      const { el, extent } = this.make(this.start, this.cursor);
+      previewGraphics(this.app, vc, el, ctx, vp.theme.preview, 0.1);
+      const S = (p) => vc.modelToScreen(p);
+      drawTempDim(ctx, S(this.start), S(this.cursor), this.fmt(extent.length), vp.theme.preview, vp.theme, -20);
+      const at = vc.modelToScreen(mid(this.start, this.cursor));
+      const slope = (100 * Math.abs(extent.rise)) / extent.length;
+      drawTag(ctx, at.x + 18, at.y + 24, `Inclinação ${slope.toFixed(1)}%`, { bg: vp.theme.bgCss, fg: vp.theme.inkCss, border: vp.theme.preview });
+    }
+    this.drawSnap(ctx, vc, vp);
+  }
+}
+
 // Rooms -------------------------------------------------------------------------------------------------
 
 export class RoomTool extends Tool {
@@ -1603,4 +1734,3 @@ export function createLevel(app, elevation, name) {
   app.toast(`${lvName} adicionado com suas plantas baixa e de forro.`);
   return level;
 }
-

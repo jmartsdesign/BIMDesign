@@ -7,6 +7,10 @@ import { ModelController } from './model.js';
 import { PlanController } from './plan.js';
 import { drawLayerTexts } from './overlay.js';
 
+export function printTheme(theme) {
+  return { ...theme, ink: [0, 0, 0], bg: [1, 1, 1], inkCss: '#000000', bgCss: '#ffffff' };
+}
+
 /**
  * Render a view to a canvas of w x h pixels. fit: zoom to extents first.
  * opts.camera: a camera to use instead (copied).
@@ -22,7 +26,7 @@ export function renderViewImage(app, view, w, h, { fit = true, camera = null, tr
     r2: vp.r2,
     r3: vp.r3,
     state: vp.state,
-    theme: vp.theme,
+    theme: printTheme(vp.theme),
     width: w,
     height: h,
     dpr: 1,
@@ -54,8 +58,7 @@ export function renderViewImage(app, view, w, h, { fit = true, camera = null, tr
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth);
   gl.viewport(0, 0, w, h);
-  const bg = vp.theme.bg;
-  gl.clearColor(bg[0], bg[1], bg[2], transparent ? 0 : 1);
+  gl.clearColor(1, 1, 1, transparent ? 0 : 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   // Draw without selection highlights.
   const sel = app.selection;
@@ -93,7 +96,7 @@ export function renderViewImage(app, view, w, h, { fit = true, camera = null, tr
   ctx.putImageData(img, 0, 0);
   // Text of plan graphics and annotations.
   const layer = isPlan ? c.layer : c.annot;
-  if (layer) drawLayerTexts(ctx, layer, (p) => c.modelToScreen(p), c.cam.zoom, vp.theme, () => 0);
+  if (layer) drawLayerTexts(ctx, layer, (p) => c.modelToScreen(p), c.cam.zoom, fake.theme, () => 0);
   if (isPlan) c.layer.dispose();
   else c.annot?.dispose();
   vp.requestRender();

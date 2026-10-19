@@ -6,7 +6,7 @@
 
 > **Versão alfa inicial.** Os recursos podem mudar e os dados do projeto podem ser perdidos. Ainda não confie ao BIMDesign projetos reais e mantenha cópias dos trabalhos importantes.
 
-BIMDesign representa edifícios com elementos reais organizados por pavimentos: paredes com várias camadas, portas e janelas que abrem os respetivos vãos, pisos, forros, coberturas, pilares, vigas, escadas, guarda-corpos, mobiliário e equipamentos, além de ambientes com medições automáticas. Todas as vistas são geradas a partir do mesmo modelo, pelo que uma alteração numa planta também se reflete nos cortes, nas elevações, na vista 3D, nas tabelas e nas pranchas.
+BIMDesign representa edifícios com elementos reais organizados por pavimentos: paredes com várias camadas, portas e janelas que abrem os respetivos vãos, pisos, forros, coberturas, pilares, vigas, escadas, rampas, guarda-corpos, mobiliário e equipamentos, além de ambientes com medições automáticas. Todas as vistas são geradas a partir do mesmo modelo, pelo que uma alteração numa planta também se reflete nos cortes, nas elevações, na vista 3D, nas tabelas e nas pranchas.
 
 O programa funciona inteiramente no navegador e não precisa de conta nem de ligação à Internet. Os ficheiros de projeto são abertos e guardados neste dispositivo.
 
@@ -25,7 +25,7 @@ Mantenha juntos os ficheiros da pasta transferida, incluindo `bundle.js`. Este f
 - Pisos e forros criados a partir de um ambiente ou do contorno do edifício selecionado, de um retângulo ou de um contorno desenhado. Coberturas definidas por pendentes em cada aresta: de quatro águas, de duas águas ou de uma água, geradas a partir do mesmo modelo.
 - As paredes podem ficar ligadas a uma cobertura e acompanhar as alterações à sua forma.
 - Aberturas de caixa que atravessam pisos, forros e coberturas ao longo de vários pavimentos.
-- Pilares, vigas, escadas retas, em L e em U com número automático de espelhos, patamares e corrimãos, e guarda-corpos.
+- Pilares, vigas, escadas retas, em L e em U com número automático de espelhos, patamares e corrimãos; rampas com largura, espessura e pavimento de chegada (ou altura definida); e guarda-corpos.
 - Biblioteca de mobiliário, armários, louças sanitárias, eletrodomésticos, plantas e iluminação. O mobiliário colocado junto a uma parede fica orientado com a parte posterior virada para ela.
 - Ambientes colocados manual ou automaticamente, delimitados por paredes, pilares e linhas separadoras, com cálculo em tempo real de área, perímetro e volume.
 - Pavimentos e grelhas de eixos.
@@ -62,7 +62,8 @@ Mantenha juntos os ficheiros da pasta transferida, incluindo `bundle.js`. Este f
 2. Desenhe paredes com **Parede** (WA). Clique para iniciar e volte a clicar para terminar cada segmento; introduza um número para definir o comprimento. Prima Esc para terminar a sequência.
 3. Adicione portas (DR) e janelas (WN) movendo o cursor sobre uma parede. Prima Espaço para inverter a orientação.
 4. Crie um **Piso** ou uma **Cobertura** clicando numa parede do edifício e, em seguida, em **Concluir**.
-5. Coloque ambientes (RM) e abra uma **Vista 3D**, elevação ou corte no Navegador de Projeto.
+5. Use **Rampa** (RA), clique no início e no fim da projeção em planta e ajuste a largura, a espessura e o pavimento de chegada na barra de opções.
+6. Coloque ambientes (RM) e abra uma **Vista 3D**, elevação ou corte no Navegador de Projeto.
 
 Navegação: a roda do rato amplia ou reduz em torno do cursor; o botão do meio desloca a vista. Em 3D, arraste com o botão direito (ou com Shift e o botão do meio) para orbitar. Em ecrãs táteis, use o gesto de pinça para ampliar ou reduzir, arraste com dois dedos para deslocar e com um dedo para orbitar em 3D. Prima F1 para consultar a ajuda e os atalhos.
 
